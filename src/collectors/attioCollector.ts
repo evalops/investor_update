@@ -1,4 +1,6 @@
 import { BaseCollector, CollectorResult } from './baseCollector';
+import { logger } from '../utils/logger';
+import { getOptionalEnvVar } from '../utils/envValidator';
 
 export interface AttioContact {
   id: string;
@@ -89,7 +91,7 @@ export class AttioCollector extends BaseCollector {
 
   constructor() {
     super();
-    this.apiKey = process.env.ATTIO_API_KEY || null;
+    this.apiKey = getOptionalEnvVar('ATTIO_API_KEY') || null;
     this.isConfigured = !!this.apiKey;
   }
 
@@ -169,11 +171,11 @@ export class AttioCollector extends BaseCollector {
 
   // Helper to log available attributes for debugging
   private logAvailableAttributes(record: AttioRecord, objectType: string) {
-    console.log(`Available ${objectType} attributes:`, Object.keys(record.values));
+    logger.debug(`Available ${objectType} attributes`, { attributes: Object.keys(record.values) });
     Object.keys(record.values).forEach(key => {
       const value = record.values[key];
       if (value && value.length > 0) {
-        console.log(`  ${key}:`, value[0].attribute_type, value[0]);
+        logger.debug(`${objectType} attribute: ${key}`, { type: value[0].attribute_type, value: value[0] });
       }
     });
   }
@@ -241,7 +243,7 @@ export class AttioCollector extends BaseCollector {
       
       return { count: people.length, contacts };
     } catch (error) {
-      console.warn('Failed to get contact data:', error);
+      logger.warn('Failed to get contact data', { error });
       return { count: 0, contacts: [] };
     }
   }
@@ -262,7 +264,7 @@ export class AttioCollector extends BaseCollector {
       
       return { count: companies.length, companies: companyData };
     } catch (error) {
-      console.warn('Failed to get company data:', error);
+      logger.warn('Failed to get company data', { error });
       return { count: 0, companies: [] };
     }
   }
@@ -329,7 +331,7 @@ export class AttioCollector extends BaseCollector {
         deals
       };
     } catch (error) {
-      console.warn('Failed to get deal metrics:', error);
+      logger.warn('Failed to get deal metrics', { error });
       return {
         totalDeals: 0,
         openDeals: 0,
@@ -357,7 +359,7 @@ export class AttioCollector extends BaseCollector {
 
       return newContacts.length;
     } catch (error) {
-      console.warn('Failed to get monthly new contacts:', error);
+      logger.warn('Failed to get monthly new contacts', { error });
       return 0;
     }
   }
@@ -385,7 +387,7 @@ export class AttioCollector extends BaseCollector {
       if (lastMonthContacts === 0) return 0;
       return ((thisMonthContacts - lastMonthContacts) / lastMonthContacts) * 100;
     } catch (error) {
-      console.warn('Failed to calculate contact growth rate:', error);
+      logger.warn('Failed to calculate contact growth rate', { error });
       return 0;
     }
   }

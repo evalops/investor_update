@@ -2,6 +2,7 @@ import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { ChartConfiguration } from 'chart.js';
 import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
 import { getTheme, ChartTheme } from '../config/chartThemes';
+import { logger } from '../utils/logger';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -97,7 +98,7 @@ export class ChartGenerator {
           await fs.writeFile(chartPath, chartBuffer);
           return chartPath;
         } catch (error) {
-          console.error(`Failed to generate chart ${name}:`, error);
+          logger.error(`Failed to generate chart ${name}`, { chartName: name, error });
           return null;
         }
       })

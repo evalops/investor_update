@@ -121,7 +121,7 @@ describe('End-to-End Integration Tests', () => {
     test('should handle invalid Mercury API token gracefully', () => {
       delete process.env.MERCURY_API_TOKEN;
       
-      expect(() => new MercuryClient()).toThrow('MERCURY_API_TOKEN not found');
+      expect(() => new MercuryClient()).toThrow('Required environment variable MERCURY_API_TOKEN is not set');
       
       // Restore for other tests
       process.env.MERCURY_API_TOKEN = 'test-token';

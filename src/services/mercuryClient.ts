@@ -11,6 +11,7 @@ import {
 } from '../schemas/mercury';
 import { Logger } from '../utils/logger';
 import { rateLimiter, retryHandler } from '../utils/rateLimiter';
+import { getRequiredEnvVar, getOptionalEnvVar } from '../utils/envValidator';
 
 dotenv.config();
 
@@ -59,12 +60,8 @@ export class MercuryClient {
   private client: AxiosInstance;
 
   constructor() {
-    const apiToken = process.env.MERCURY_API_TOKEN;
-    const baseURL = process.env.MERCURY_API_BASE_URL || 'https://api.mercury.com/api/v1';
-
-    if (!apiToken) {
-      throw new Error('MERCURY_API_TOKEN not found in environment variables');
-    }
+    const apiToken = getRequiredEnvVar('MERCURY_API_TOKEN');
+    const baseURL = getOptionalEnvVar('MERCURY_API_BASE_URL', 'https://api.mercury.com/api/v1');
 
     this.client = axios.create({
       baseURL,
@@ -110,13 +107,12 @@ export class MercuryClient {
   }
 
   async getAccountBalance(accountId: string): Promise<AccountBalance> {
-    try {
+    await rateLimiter.waitForLimit('mercury');
+    
+    return retryHandler.withRetry(async () => {
       const response = await this.client.get(`/account/${accountId}/balance`);
       return response.data;
-    } catch (error) {
-      logger.error(`Error fetching balance for account ${accountId}:`, error as Error);
-      throw error;
-    }
+    }, { maxRetries: 3 }, `Mercury.getAccountBalance(${accountId})`);
   }
 
   async getTransactions(

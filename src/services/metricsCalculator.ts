@@ -12,6 +12,7 @@ import {
   addDays,
   startOfWeek
 } from 'date-fns';
+import { logger } from '../utils/logger';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -143,7 +144,7 @@ export class MetricsCalculator {
       const configData = fs.readFileSync(configPath, 'utf8');
       return JSON.parse(configData);
     } catch (error) {
-      console.warn('Could not load category config, using defaults:', error);
+      logger.warn('Could not load category config, using defaults', { error });
       return {
         categories: {},
         defaultCategory: 'Other',

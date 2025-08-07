@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 export interface CollectorResult {
   source: string;
   data: Record<string, any>;
@@ -54,7 +56,7 @@ export abstract class BaseCollector {
         lastError = error as Error;
 
         if (attempt < maxRetries) {
-          console.warn(`Attempt ${attempt + 1} failed, retrying in ${delayMs}ms:`, error);
+          logger.warn(`Attempt ${attempt + 1} failed, retrying in ${delayMs}ms`, { attempt: attempt + 1, maxRetries, delayMs, error });
           await new Promise(resolve => setTimeout(resolve, delayMs));
           delayMs *= 2; // Exponential backoff
         }

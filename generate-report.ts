@@ -12,6 +12,7 @@ import { validateConfig, ValidationError, APIError, formatError, withRetry } fro
 import { Logger } from './src/utils/logger';
 import { validateEnvironmentVariables, testDataSourceConnections, ensureRequiredEnvironment } from './src/utils/environmentValidator';
 import { runConfigurationWizard } from './src/utils/configWizard';
+import { StartupValidator } from './src/utils/startupValidator';
 import { format } from 'date-fns';
 
 const logger = Logger.for('InvestorUpdate');
@@ -159,6 +160,17 @@ async function generateReport(): Promise<void> {
   const config = await parseArgs();
 
   logger.info('Starting investor update generation', config);
+
+  // Quick startup validation - fail fast with clear errors
+  console.log('🔍 Validating system health...');
+  const startupValidator = new StartupValidator();
+  const validationResult = await startupValidator.validateAll();
+  
+  if (validationResult.overall === 'error') {
+    console.log('\n❌ System validation failed! Please fix the errors above before generating reports.');
+    console.log('💡 Run "bun run validate" for detailed diagnostics.');
+    process.exit(1);
+  }
 
   // Validate environment before proceeding
   logger.debug('Validating required environment configuration...');
