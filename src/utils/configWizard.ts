@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+
 import { Logger } from './logger';
 
 const logger = Logger.for('ConfigWizard');
@@ -32,9 +33,9 @@ const CONFIGURATION_STEPS: WizardStep[] = [
 3. Create a new API key with read permissions
 4. Copy the token (starts with 'mer_live_' or 'mer_sandbox_')`,
     validation: (value: string) => {
-      if (!value) return 'API token is required';
-      if (!value.startsWith('mer_')) return 'Token should start with "mer_"';
-      if (value.length < 20) return 'Token seems too short';
+      if (!value) {return 'API token is required';}
+      if (!value.startsWith('mer_')) {return 'Token should start with "mer_"';}
+      if (value.length < 20) {return 'Token seems too short';}
       return true;
     }
   },
@@ -92,8 +93,8 @@ const CONFIGURATION_STEPS: WizardStep[] = [
 2. Go to Developers > API Keys
 3. Copy your Secret Key (not Publishable Key)`,
     validation: (value: string) => {
-      if (!value) return true; // Optional
-      if (!value.startsWith('sk_')) return 'Stripe secret key should start with "sk_"';
+      if (!value) {return true;} // Optional
+      if (!value.startsWith('sk_')) {return 'Stripe secret key should start with "sk_"';}
       return true;
     }
   },
@@ -313,7 +314,7 @@ async function promptBoolean(question: string, defaultValue: boolean = false): P
   const defaultText = defaultValue ? 'Y/n' : 'y/N';
   const answer = await promptInput(`${question} (${defaultText})`);
   
-  if (!answer) return defaultValue;
+  if (!answer) {return defaultValue;}
   
   return answer.toLowerCase().startsWith('y');
 }

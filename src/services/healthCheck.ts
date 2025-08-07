@@ -1,8 +1,11 @@
+import * as dotenv from 'dotenv';
+
+import { cacheManager } from '../utils/cache.enhanced';
+import { Logger } from '../utils/logger';
+
 import { MercuryClient } from './mercuryClient';
 import { MetricsAggregator } from './metricsAggregator';
-import { Logger } from '../utils/logger';
-import { cacheManager } from '../utils/cache.enhanced';
-import * as dotenv from 'dotenv';
+
 
 dotenv.config();
 

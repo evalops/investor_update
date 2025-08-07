@@ -1,6 +1,9 @@
-import { Transaction } from './mercuryClient';
-import { CohortMetrics, CohortAnalyzer } from './cohortAnalyzer';
 import { format, parseISO, startOfMonth, subMonths, isWithinInterval } from 'date-fns';
+
+import type { CohortMetrics} from './cohortAnalyzer';
+import { CohortAnalyzer } from './cohortAnalyzer';
+import type { Transaction } from './mercuryClient';
+
 
 export interface UnitEconomics {
   // Core metrics
@@ -139,7 +142,7 @@ export class UnitEconomicsCalculator {
           totalSpend += amount;
 
           // Categorize by channel
-          let channel = this.categorizeMarketingChannel(fullText);
+          const channel = this.categorizeMarketingChannel(fullText);
           channels[channel] = (channels[channel] || 0) + amount;
 
           // Split between organic and paid
@@ -160,16 +163,16 @@ export class UnitEconomicsCalculator {
   }
 
   private categorizeMarketingChannel(text: string): string {
-    if (text.includes('google') || text.includes('adwords')) return 'Google Ads';
-    if (text.includes('facebook') || text.includes('meta')) return 'Facebook Ads';
-    if (text.includes('linkedin')) return 'LinkedIn Ads';
-    if (text.includes('twitter') || text.includes('x.com')) return 'Twitter Ads';
-    if (text.includes('email') || text.includes('mailchimp')) return 'Email Marketing';
-    if (text.includes('content') || text.includes('blog')) return 'Content Marketing';
-    if (text.includes('seo') || text.includes('search')) return 'SEO';
-    if (text.includes('influencer') || text.includes('affiliate')) return 'Influencer/Affiliate';
-    if (text.includes('event') || text.includes('conference')) return 'Events';
-    if (text.includes('analytics') || text.includes('tracking')) return 'Analytics/Tools';
+    if (text.includes('google') || text.includes('adwords')) {return 'Google Ads';}
+    if (text.includes('facebook') || text.includes('meta')) {return 'Facebook Ads';}
+    if (text.includes('linkedin')) {return 'LinkedIn Ads';}
+    if (text.includes('twitter') || text.includes('x.com')) {return 'Twitter Ads';}
+    if (text.includes('email') || text.includes('mailchimp')) {return 'Email Marketing';}
+    if (text.includes('content') || text.includes('blog')) {return 'Content Marketing';}
+    if (text.includes('seo') || text.includes('search')) {return 'SEO';}
+    if (text.includes('influencer') || text.includes('affiliate')) {return 'Influencer/Affiliate';}
+    if (text.includes('event') || text.includes('conference')) {return 'Events';}
+    if (text.includes('analytics') || text.includes('tracking')) {return 'Analytics/Tools';}
     return 'Other Marketing';
   }
 
@@ -184,14 +187,14 @@ export class UnitEconomicsCalculator {
   private calculatePaybackPeriod(): number {
     // Calculate based on cohort retention and average monthly revenue
     const cohorts = this.cohortMetrics.cohorts;
-    if (cohorts.length === 0) return 0;
+    if (cohorts.length === 0) {return 0;}
 
     let totalWeightedPayback = 0;
     let totalCustomers = 0;
 
     cohorts.forEach(cohort => {
       const monthlyRevenue = cohort.averageOrderValue;
-      if (monthlyRevenue === 0) return;
+      if (monthlyRevenue === 0) {return;}
 
       // Find when cumulative revenue exceeds CAC
       let cumulativeRevenue = 0;
@@ -244,7 +247,7 @@ export class UnitEconomicsCalculator {
     const startDate = subMonths(today, months);
 
     const recentTransactions = this.transactions.filter(t => {
-      if (!t.postedDate) return false;
+      if (!t.postedDate) {return false;}
       const date = parseISO(t.postedDate);
       return isWithinInterval(date, { start: startDate, end: today });
     });
@@ -266,7 +269,7 @@ export class UnitEconomicsCalculator {
     const recentCohorts = this.cohortMetrics.cohorts.filter(c => c.cohortMonth >= cutoffDate);
     const olderCohorts = this.cohortMetrics.cohorts.filter(c => c.cohortMonth < cutoffDate);
 
-    if (recentCohorts.length === 0 || olderCohorts.length === 0) return 0;
+    if (recentCohorts.length === 0 || olderCohorts.length === 0) {return 0;}
 
     const recentLTV = recentCohorts.reduce((sum, c) => sum + c.totalRevenue, 0) /
       recentCohorts.reduce((sum, c) => sum + c.customersAcquired, 0);
@@ -281,15 +284,15 @@ export class UnitEconomicsCalculator {
     let score = 1;
 
     // LTV:CAC ratio scoring (70% of score)
-    if (ltvCacRatio >= 5) score += 7; // Excellent (5:1 or better)
-    else if (ltvCacRatio >= 3) score += 5; // Good (3:1)
-    else if (ltvCacRatio >= 2) score += 3; // Acceptable (2:1)
-    else if (ltvCacRatio >= 1) score += 1; // Break-even
+    if (ltvCacRatio >= 5) {score += 7;} // Excellent (5:1 or better)
+    else if (ltvCacRatio >= 3) {score += 5;} // Good (3:1)
+    else if (ltvCacRatio >= 2) {score += 3;} // Acceptable (2:1)
+    else if (ltvCacRatio >= 1) {score += 1;} // Break-even
 
     // Payback period scoring (30% of score)
-    if (paybackMonths <= 6) score += 2; // Excellent
-    else if (paybackMonths <= 12) score += 1.5; // Good
-    else if (paybackMonths <= 18) score += 0.5; // Acceptable
+    if (paybackMonths <= 6) {score += 2;} // Excellent
+    else if (paybackMonths <= 12) {score += 1.5;} // Good
+    else if (paybackMonths <= 18) {score += 0.5;} // Acceptable
 
     return Math.min(score, 10);
   }
@@ -340,7 +343,7 @@ export class UnitEconomicsCalculator {
 
         // Check if it's marketing spend (simplified check)
         if (description.includes('ads') || description.includes('marketing') || counterparty.includes('google')) {
-          if (!monthlyData[month]) monthlyData[month] = { spend: 0, customers: 0 };
+          if (!monthlyData[month]) {monthlyData[month] = { spend: 0, customers: 0 };}
           monthlyData[month].spend += Math.abs(transaction.amount);
         }
       });

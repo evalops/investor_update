@@ -1,6 +1,9 @@
-import { BaseCollector, CollectorResult } from './baseCollector';
-import { logger } from '../utils/logger';
 import { getOptionalEnvVar } from '../utils/envValidator';
+import { logger } from '../utils/logger';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
+
 
 export interface AttioContact {
   id: string;
@@ -98,11 +101,11 @@ export class AttioCollector extends BaseCollector {
   // Helper to extract the current value from Attio's historical data structure
   private extractValue(record: AttioRecord, attributeName: string, defaultValue: any = null): any {
     const values = record.values[attributeName];
-    if (!values || values.length === 0) return defaultValue;
+    if (!values || values.length === 0) {return defaultValue;}
     
     // Get the most recent active value
     const activeValue = values.find(v => v.active_until === null);
-    if (!activeValue) return defaultValue;
+    if (!activeValue) {return defaultValue;}
     
     // Handle different attribute types
     switch (activeValue.attribute_type) {
@@ -141,14 +144,14 @@ export class AttioCollector extends BaseCollector {
 
   // Helper to parse employee range strings to numbers
   private parseEmployeeRange(range: string | null): number | undefined {
-    if (!range) return undefined;
+    if (!range) {return undefined;}
     
     // Parse ranges like "251-1K", "1-10", "11-50", etc.
     const match = range.match(/^(\d+)[\s-]*(?:to|-)?\s*(\d+|[KM]?)$/i);
-    if (!match) return undefined;
+    if (!match) {return undefined;}
     
-    let start = parseInt(match[1]);
-    let endStr = match[2];
+    const start = parseInt(match[1]);
+    const endStr = match[2];
     
     if (endStr.toUpperCase().includes('K')) {
       // Handle "1K" format
@@ -384,7 +387,7 @@ export class AttioCollector extends BaseCollector {
         return createdAt >= twoMonthsAgo && createdAt < oneMonthAgo;
       }).length;
 
-      if (lastMonthContacts === 0) return 0;
+      if (lastMonthContacts === 0) {return 0;}
       return ((thisMonthContacts - lastMonthContacts) / lastMonthContacts) * 100;
     } catch (error) {
       logger.warn('Failed to calculate contact growth rate', { error });

@@ -1,8 +1,11 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { logger } from '../utils/logger';
-import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
+
 import { format, parseISO, startOfMonth, subMonths } from 'date-fns';
+
+import { logger } from '../utils/logger';
+
+import type { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
 
 export interface MetricsSnapshot {
   month: string; // YYYY-MM format
@@ -177,8 +180,8 @@ export class HistoricalTracker {
         changeAbsolute = currentValue - previousValue;
         changePercent = (changeAbsolute / previousValue) * 100;
         
-        if (Math.abs(changePercent) < 1) trend = 'flat';
-        else trend = changePercent > 0 ? 'up' : 'down';
+        if (Math.abs(changePercent) < 1) {trend = 'flat';}
+        else {trend = changePercent > 0 ? 'up' : 'down';}
       }
 
       // Find best and worst months

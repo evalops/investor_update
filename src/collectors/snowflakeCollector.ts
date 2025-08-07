@@ -1,5 +1,8 @@
-import { BaseCollector, CollectorResult } from './baseCollector';
 import * as snowflake from 'snowflake-sdk';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
+
 
 export interface EvalOpsProductMetrics {
   evalRuns: number;
@@ -31,7 +34,7 @@ export class SnowflakeCollector extends BaseCollector {
   }
 
   private async connect(): Promise<any> {
-    if (this.connection) return this.connection;
+    if (this.connection) {return this.connection;}
 
     // Check for external browser authentication (SSO)
     const useExternalBrowser = process.env.SNOWFLAKE_AUTHENTICATOR === 'externalbrowser';

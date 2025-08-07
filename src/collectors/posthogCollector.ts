@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { BaseCollector, CollectorResult } from './baseCollector';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
 
 export interface PostHogMetrics {
   // Core product metrics
@@ -285,8 +287,8 @@ export class PostHogCollector extends BaseCollector {
             const rate = value.count / cohort.values[0].count;
             retention[`Period ${periodIndex}`] = rate;
 
-            if (periodIndex === 1) retentionRates['1-week'] = rate;
-            if (periodIndex === 4) retentionRates['1-month'] = rate;
+            if (periodIndex === 1) {retentionRates['1-week'] = rate;}
+            if (periodIndex === 4) {retentionRates['1-month'] = rate;}
           });
 
           cohorts.push({
@@ -362,18 +364,18 @@ export class PostHogCollector extends BaseCollector {
     // DAU/MAU ratio (stickiness)
     if (data.mau > 0) {
       const stickiness = data.dau / data.mau;
-      if (stickiness >= 0.2) score += 3;
-      else if (stickiness >= 0.1) score += 2;
-      else if (stickiness >= 0.05) score += 1;
+      if (stickiness >= 0.2) {score += 3;}
+      else if (stickiness >= 0.1) {score += 2;}
+      else if (stickiness >= 0.05) {score += 1;}
     }
 
     // Session duration
-    if (data.avgSessionDuration >= 600) score += 2; // 10+ minutes
-    else if (data.avgSessionDuration >= 300) score += 1; // 5+ minutes
+    if (data.avgSessionDuration >= 600) {score += 2;} // 10+ minutes
+    else if (data.avgSessionDuration >= 300) {score += 1;} // 5+ minutes
 
     // Session frequency
-    if (data.sessionsPerUser >= 5) score += 2;
-    else if (data.sessionsPerUser >= 2) score += 1;
+    if (data.sessionsPerUser >= 5) {score += 2;}
+    else if (data.sessionsPerUser >= 2) {score += 1;}
 
     return Math.min(score, 10);
   }
@@ -428,7 +430,7 @@ export class PostHogCollector extends BaseCollector {
         this.getNewUsersForPeriod(headers, lastMonth)
       ]);
 
-      if (lastMonthUsers === 0) return 0;
+      if (lastMonthUsers === 0) {return 0;}
       return ((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100;
     } catch (error) {
       // Silently return 0 - PostHog data is optional

@@ -1,8 +1,10 @@
-import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
-import { Metrics } from './metricsAggregator';
 import { format } from 'date-fns';
+
 import { generateProfessionalHTML } from '../templates/htmlTemplate';
 import { generateEmailUpdate } from '../templates/template';
+
+import type { Metrics } from './metricsAggregator';
+import type { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
 
 
 export interface InvestorUpdate {
@@ -48,7 +50,7 @@ export class UpdateGenerator {
   }
 
   private generatePeriod(metrics: StartupMetrics): string {
-    if (metrics.monthlyMetrics.length === 0) return 'No data available';
+    if (metrics.monthlyMetrics.length === 0) {return 'No data available';}
 
     const firstMonth = metrics.monthlyMetrics[0].month;
     const lastMonth = metrics.monthlyMetrics[metrics.monthlyMetrics.length - 1].month;
@@ -322,14 +324,14 @@ export class UpdateGenerator {
   }
 
   private analyzeTrend(values: number[]): 'increasing' | 'decreasing' | 'stable' {
-    if (values.length < 2) return 'stable';
+    if (values.length < 2) {return 'stable';}
 
     let increasingCount = 0;
     let decreasingCount = 0;
 
     for (let i = 1; i < values.length; i++) {
-      if (values[i] > values[i - 1] * 1.05) increasingCount++;
-      else if (values[i] < values[i - 1] * 0.95) decreasingCount++;
+      if (values[i] > values[i - 1] * 1.05) {increasingCount++;}
+      else if (values[i] < values[i - 1] * 0.95) {decreasingCount++;}
     }
 
     if (increasingCount > decreasingCount && increasingCount > values.length / 2) {
@@ -342,7 +344,7 @@ export class UpdateGenerator {
   }
 
   private estimateMonthsToTarget(current: number, growthRate: number, target: number): number {
-    if (current >= target || growthRate <= 0) return -1;
+    if (current >= target || growthRate <= 0) {return -1;}
 
     const monthlyGrowth = 1 + (growthRate / 100);
     return Math.ceil(Math.log(target / current) / Math.log(monthlyGrowth));

@@ -1,8 +1,9 @@
-import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
-import { GitHubMetrics } from '../collectors/githubCollector';
-import { PostHogMetrics } from '../collectors/posthogCollector';
-import { CohortMetrics } from './cohortAnalyzer';
-import { UnitEconomics } from './unitEconomicsCalculator';
+import type { GitHubMetrics } from '../collectors/githubCollector';
+import type { PostHogMetrics } from '../collectors/posthogCollector';
+
+import type { CohortMetrics } from './cohortAnalyzer';
+import type { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
+import type { UnitEconomics } from './unitEconomicsCalculator';
 
 export interface NarrativeInsights {
   executiveSummary: string;
@@ -390,17 +391,17 @@ export class NarrativeGenerator {
     score += (financialMetrics.ycGrowthScore - 5) * 0.4;
 
     // Primary metric performance (30% weight)
-    if (financialMetrics.primaryMetric.status === 'ahead') score += 1.5;
-    else if (financialMetrics.primaryMetric.status === 'behind') score -= 1.5;
+    if (financialMetrics.primaryMetric.status === 'ahead') {score += 1.5;}
+    else if (financialMetrics.primaryMetric.status === 'behind') {score -= 1.5;}
 
     // Financial health (20% weight)
-    if (financialMetrics.runwayMonths > 18) score += 1;
-    else if (financialMetrics.runwayMonths < 6 && financialMetrics.runwayMonths !== Infinity) score -= 2;
+    if (financialMetrics.runwayMonths > 18) {score += 1;}
+    else if (financialMetrics.runwayMonths < 6 && financialMetrics.runwayMonths !== Infinity) {score -= 2;}
 
     // Unit economics (10% weight)
     if (unitEconomics) {
-      if (unitEconomics.ltvToCacRatio >= 3) score += 0.5;
-      else if (unitEconomics.ltvToCacRatio < 2) score -= 0.5;
+      if (unitEconomics.ltvToCacRatio >= 3) {score += 0.5;}
+      else if (unitEconomics.ltvToCacRatio < 2) {score -= 0.5;}
     }
 
     const sentiment = score >= 6.5 ? 'positive' : score >= 4.5 ? 'neutral' : 'negative';
@@ -411,7 +412,7 @@ export class NarrativeGenerator {
   private analyzeGrowthTrend(): 'accelerating' | 'steady' | 'declining' {
     const { financialMetrics } = this.metrics;
 
-    if (financialMetrics.monthlyMetrics.length < 3) return 'steady';
+    if (financialMetrics.monthlyMetrics.length < 3) {return 'steady';}
 
     const recentGrowth = financialMetrics.monthlyMetrics.slice(-3);
     const revenues = recentGrowth.map(m => m.revenue);
@@ -421,12 +422,12 @@ export class NarrativeGenerator {
 
     for (let i = 1; i < revenues.length; i++) {
       const growthRate = revenues[i - 1] > 0 ? (revenues[i] - revenues[i - 1]) / revenues[i - 1] : 0;
-      if (growthRate > 0.1) accelerating++;
-      else if (growthRate < -0.05) declining++;
+      if (growthRate > 0.1) {accelerating++;}
+      else if (growthRate < -0.05) {declining++;}
     }
 
-    if (accelerating > declining) return 'accelerating';
-    if (declining > accelerating) return 'declining';
+    if (accelerating > declining) {return 'accelerating';}
+    if (declining > accelerating) {return 'declining';}
     return 'steady';
   }
 
@@ -438,8 +439,8 @@ export class NarrativeGenerator {
   private inferBusinessModel(): string {
     const { financialMetrics } = this.metrics;
 
-    if (financialMetrics.mrr > 0) return 'subscription SaaS';
-    if (financialMetrics.customersCount > 0) return 'B2B sales';
+    if (financialMetrics.mrr > 0) {return 'subscription SaaS';}
+    if (financialMetrics.customersCount > 0) {return 'B2B sales';}
     return 'product-led growth';
   }
 

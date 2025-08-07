@@ -1,5 +1,6 @@
-import { Transaction } from './mercuryClient';
 import { format, parseISO, startOfMonth, addMonths, differenceInMonths } from 'date-fns';
+
+import type { Transaction } from './mercuryClient';
 
 export interface CustomerCohort {
   cohortMonth: string; // YYYY-MM format
@@ -55,7 +56,7 @@ export class CohortAnalyzer {
 
     // Group transactions by counterparty to identify customers
     this.transactions.forEach(txn => {
-      if (!txn.counterpartyName || txn.amount <= 0) return;
+      if (!txn.counterpartyName || txn.amount <= 0) {return;}
 
       const customerKey = this.normalizeCustomerName(txn.counterpartyName);
       const txnDate = parseISO(txn.postedDate!);
@@ -98,7 +99,7 @@ export class CohortAnalyzer {
 
   private isRecurringCustomer(pattern: { amounts: number[], dates: Date[], totalTxns: number }): boolean {
     // Consider a customer recurring if they have multiple transactions with similar amounts
-    if (pattern.totalTxns < 2) return false;
+    if (pattern.totalTxns < 2) {return false;}
 
     const amounts = pattern.amounts.sort((a, b) => a - b);
     const median = amounts[Math.floor(amounts.length / 2)];
@@ -213,7 +214,7 @@ export class CohortAnalyzer {
 
     for (let month = 0; month < 12; month++) {
       const cohortsWithData = cohorts.filter(c => c.retentionByMonth[month] !== undefined);
-      if (cohortsWithData.length === 0) continue;
+      if (cohortsWithData.length === 0) {continue;}
 
       const weightedSum = cohortsWithData.reduce((sum, cohort) => {
         return sum + (cohort.retentionByMonth[month] * cohort.customersAcquired);
@@ -230,7 +231,7 @@ export class CohortAnalyzer {
   private calculateNetRevenueRetention(cohorts: CustomerCohort[]): number {
     // Calculate 12-month NRR across all cohorts
     const cohortsWithFullYear = cohorts.filter(c => c.revenueRetentionByMonth[11] !== undefined);
-    if (cohortsWithFullYear.length === 0) return 0;
+    if (cohortsWithFullYear.length === 0) {return 0;}
 
     const weightedNRR = cohortsWithFullYear.reduce((sum, cohort) => {
       return sum + (cohort.revenueRetentionByMonth[11] * cohort.totalRevenue);
@@ -242,7 +243,7 @@ export class CohortAnalyzer {
   }
 
   private calculateLifetimeValue(cohorts: CustomerCohort[]): number {
-    if (cohorts.length === 0) return 0;
+    if (cohorts.length === 0) {return 0;}
 
     // Use average revenue per customer across all cohorts
     const totalRevenue = cohorts.reduce((sum, cohort) => sum + cohort.totalRevenue, 0);
@@ -252,7 +253,7 @@ export class CohortAnalyzer {
   }
 
   private calculateAverageLifespan(cohorts: CustomerCohort[]): number {
-    if (cohorts.length === 0) return 0;
+    if (cohorts.length === 0) {return 0;}
 
     let totalWeightedLifespan = 0;
     let totalCustomers = 0;
@@ -275,7 +276,7 @@ export class CohortAnalyzer {
 
   private calculateChurnRate(cohorts: CustomerCohort[]): number {
     // Calculate average monthly churn rate
-    if (cohorts.length === 0) return 0;
+    if (cohorts.length === 0) {return 0;}
 
     let totalChurn = 0;
     let monthsWithData = 0;

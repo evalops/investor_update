@@ -1,14 +1,21 @@
-import { EvalOpsMetrics, StartupMetrics } from './metricsCalculator';
+import type { AttioMetrics } from '../collectors/attioCollector';
+import { AttioCollector } from '../collectors/attioCollector';
+import { GCPCollector } from '../collectors/gcpCollector';
+import type { GitHubMetrics } from '../collectors/githubCollector';
+import { GitHubCollector } from '../collectors/githubCollector';
+import type { PostHogMetrics } from '../collectors/posthogCollector';
+import { PostHogCollector } from '../collectors/posthogCollector';
 import { SnowflakeCollector } from '../collectors/snowflakeCollector';
 import { StripeCollector } from '../collectors/stripeCollector';
-import { GCPCollector } from '../collectors/gcpCollector';
-import { GitHubCollector, GitHubMetrics } from '../collectors/githubCollector';
-import { PostHogCollector, PostHogMetrics } from '../collectors/posthogCollector';
-import { AttioCollector, AttioMetrics } from '../collectors/attioCollector';
-import { CohortAnalyzer, CohortMetrics } from './cohortAnalyzer';
-import { UnitEconomicsCalculator, UnitEconomics } from './unitEconomicsCalculator';
-import { NarrativeGenerator, NarrativeInsights } from './narrativeGenerator';
-import { Transaction } from './mercuryClient';
+
+import type { CohortMetrics } from './cohortAnalyzer';
+import { CohortAnalyzer } from './cohortAnalyzer';
+import type { Transaction } from './mercuryClient';
+import type { EvalOpsMetrics, StartupMetrics } from './metricsCalculator';
+import type { NarrativeInsights } from './narrativeGenerator';
+import { NarrativeGenerator } from './narrativeGenerator';
+import type { UnitEconomics } from './unitEconomicsCalculator';
+import { UnitEconomicsCalculator } from './unitEconomicsCalculator';
 
 
 export interface Metrics extends EvalOpsMetrics {
@@ -173,7 +180,7 @@ export class MetricsAggregator {
   }
 
   private calculateGrossMargin(monthlyRevenue: number, monthlyComputeSpend: number): number {
-    if (monthlyRevenue <= 0) return 0;
+    if (monthlyRevenue <= 0) {return 0;}
 
     const grossProfit = monthlyRevenue - monthlyComputeSpend;
     return (grossProfit / monthlyRevenue) * 100;

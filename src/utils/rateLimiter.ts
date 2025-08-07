@@ -76,7 +76,7 @@ export class RateLimiter {
    */
   async waitForLimit(service: string): Promise<void> {
     const config = this.configs.get(service);
-    if (!config) return;
+    if (!config) {return;}
 
     while (!(await this.checkLimit(service))) {
       await this.sleep(100); // Check every 100ms

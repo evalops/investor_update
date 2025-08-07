@@ -1,6 +1,8 @@
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import * as dotenv from 'dotenv';
 import { z } from 'zod';
+
 import { 
   MercuryAccountSchema, 
   MercuryTransactionSchema,
@@ -9,9 +11,9 @@ import {
   type MercuryAccount,
   type MercuryTransaction 
 } from '../schemas/mercury';
+import { getRequiredEnvVar, getOptionalEnvVar } from '../utils/envValidator';
 import { Logger } from '../utils/logger';
 import { rateLimiter, retryHandler } from '../utils/rateLimiter';
-import { getRequiredEnvVar, getOptionalEnvVar } from '../utils/envValidator';
 
 dotenv.config();
 
@@ -128,11 +130,11 @@ export class MercuryClient {
     try {
       const params = new URLSearchParams();
 
-      if (options.offset !== undefined) params.append('offset', options.offset.toString());
-      if (options.limit !== undefined) params.append('limit', options.limit.toString());
-      if (options.search) params.append('search', options.search);
-      if (options.start) params.append('start', options.start);
-      if (options.end) params.append('end', options.end);
+      if (options.offset !== undefined) {params.append('offset', options.offset.toString());}
+      if (options.limit !== undefined) {params.append('limit', options.limit.toString());}
+      if (options.search) {params.append('search', options.search);}
+      if (options.start) {params.append('start', options.start);}
+      if (options.end) {params.append('end', options.end);}
 
       const response = await this.client.get(`/account/${accountId}/transactions`, { params });
       

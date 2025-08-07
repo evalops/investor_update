@@ -1,6 +1,6 @@
-import { InvestorUpdate } from '../services/updateGenerator';
-import { Metrics } from '../services/metricsAggregator';
-import { AttioMetrics } from '../collectors/attioCollector';
+import type { AttioMetrics } from '../collectors/attioCollector';
+import type { Metrics } from '../services/metricsAggregator';
+import type { InvestorUpdate } from '../services/updateGenerator';
 
 export function generateEmailUpdate(update: InvestorUpdate, metrics: Metrics): string {
   const companyName = "EvalOps";
@@ -191,7 +191,7 @@ function formatGrowthRate(rate: number): string {
 }
 
 function formatRunway(months: number): string {
-  if (months === Infinity) return 'Unlimited runway';
+  if (months === Infinity) {return 'Unlimited runway';}
   const years = Math.floor(months / 12);
   const remainingMonths = Math.round(months % 12);
 
@@ -214,9 +214,9 @@ function formatFoundingDate(date: Date): string {
   const today = new Date();
   const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays === 0) {return 'Today';}
+  if (diffDays === 1) {return 'Yesterday';}
+  if (diffDays < 7) {return `${diffDays} days ago`;}
 
   return date.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -260,14 +260,14 @@ function generateMilestonesSection(metrics: Metrics): string {
 }
 
 function formatTargetDate(date?: Date): string {
-  if (!date) return 'TBD';
+  if (!date) {return 'TBD';}
   const today = new Date();
   const diffDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 0) return 'Overdue';
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays < 7) return `${diffDays} days`;
-  if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks`;
+  if (diffDays <= 0) {return 'Overdue';}
+  if (diffDays === 1) {return 'Tomorrow';}
+  if (diffDays < 7) {return `${diffDays} days`;}
+  if (diffDays < 30) {return `${Math.ceil(diffDays / 7)} weeks`;}
   return `${Math.ceil(diffDays / 30)} months`;
 }
 

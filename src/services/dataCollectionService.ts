@@ -1,9 +1,10 @@
-import { logger } from '../utils/logger';
-import { DataCache } from '../utils/cache';
-import { MercuryClient } from './mercuryClient';
 import { AttioCollector } from '../collectors/attioCollector';
 import { PostHogCollector } from '../collectors/posthogCollector';
 import { SnowflakeCollector } from '../collectors/snowflakeCollector';
+import { DataCache } from '../utils/cache';
+import { logger } from '../utils/logger';
+
+import { MercuryClient } from './mercuryClient';
 
 export interface DataCollectionResult {
   source: string;
@@ -68,7 +69,7 @@ export class DataCollectionService {
       this.collectors.set('attio', async () => {
         const collector = new AttioCollector();
         const result = await collector.collect();
-        if (result.error) throw new Error(result.error);
+        if (result.error) {throw new Error(result.error);}
         return result.data;
       });
     }
@@ -78,7 +79,7 @@ export class DataCollectionService {
       this.collectors.set('posthog', async () => {
         const collector = new PostHogCollector();
         const result = await collector.collect();
-        if (result.error) throw new Error(result.error);
+        if (result.error) {throw new Error(result.error);}
         return result.data;
       });
     }
@@ -88,7 +89,7 @@ export class DataCollectionService {
       this.collectors.set('snowflake', async () => {
         const collector = new SnowflakeCollector();
         const result = await collector.collect();
-        if (result.error) throw new Error(result.error);
+        if (result.error) {throw new Error(result.error);}
         return result.data;
       });
     }
@@ -288,9 +289,9 @@ export class DataCollectionService {
   private getDataAge(timestamp: Date): string {
     const minutes = this.getMinutesOld(timestamp);
     
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${Math.round(minutes)} minutes ago`;
-    if (minutes < 1440) return `${Math.round(minutes / 60)} hours ago`;
+    if (minutes < 1) {return 'just now';}
+    if (minutes < 60) {return `${Math.round(minutes)} minutes ago`;}
+    if (minutes < 1440) {return `${Math.round(minutes / 60)} hours ago`;}
     return `${Math.round(minutes / 1440)} days ago`;
   }
 

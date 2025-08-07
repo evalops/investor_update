@@ -36,7 +36,7 @@ export class MoneyUtils {
   }
 
   static divide(a: number, divisor: number): number {
-    if (divisor === 0) return 0;
+    if (divisor === 0) {return 0;}
     return MoneyUtils.round(a / divisor);
   }
 }

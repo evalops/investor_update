@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { BaseCollector, CollectorResult } from './baseCollector';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
 
 export interface GitHubMetrics {
   // Repository metrics
@@ -164,7 +166,7 @@ export class GitHubCollector extends BaseCollector {
     let totalIssues = 0;
     let openIssues = 0;
     let closedIssuesLast30Days = 0;
-    let activeContributors = new Set();
+    const activeContributors = new Set();
     let linesOfCodeAdded = 0;
     let linesOfCodeRemoved = 0;
 
@@ -310,7 +312,7 @@ export class GitHubCollector extends BaseCollector {
       });
     });
 
-    if (allReleases.length < 2) return 0;
+    if (allReleases.length < 2) {return 0;}
 
     allReleases.sort((a, b) => a.getTime() - b.getTime());
 
@@ -353,28 +355,28 @@ export class GitHubCollector extends BaseCollector {
     let score = 1;
 
     // Commits score (30% weight)
-    if (metrics.commitsLast30Days >= 100) score += 3;
-    else if (metrics.commitsLast30Days >= 50) score += 2;
-    else if (metrics.commitsLast30Days >= 20) score += 1;
+    if (metrics.commitsLast30Days >= 100) {score += 3;}
+    else if (metrics.commitsLast30Days >= 50) {score += 2;}
+    else if (metrics.commitsLast30Days >= 20) {score += 1;}
 
     // Pull requests score (25% weight)
-    if (metrics.pullRequestsLast30Days >= 20) score += 2.5;
-    else if (metrics.pullRequestsLast30Days >= 10) score += 1.5;
-    else if (metrics.pullRequestsLast30Days >= 5) score += 0.5;
+    if (metrics.pullRequestsLast30Days >= 20) {score += 2.5;}
+    else if (metrics.pullRequestsLast30Days >= 10) {score += 1.5;}
+    else if (metrics.pullRequestsLast30Days >= 5) {score += 0.5;}
 
     // Releases score (20% weight)
-    if (metrics.releasesLast30Days >= 4) score += 2;
-    else if (metrics.releasesLast30Days >= 2) score += 1.5;
-    else if (metrics.releasesLast30Days >= 1) score += 1;
+    if (metrics.releasesLast30Days >= 4) {score += 2;}
+    else if (metrics.releasesLast30Days >= 2) {score += 1.5;}
+    else if (metrics.releasesLast30Days >= 1) {score += 1;}
 
     // Issue resolution score (15% weight)
-    if (metrics.closedIssuesLast30Days >= 20) score += 1.5;
-    else if (metrics.closedIssuesLast30Days >= 10) score += 1;
-    else if (metrics.closedIssuesLast30Days >= 5) score += 0.5;
+    if (metrics.closedIssuesLast30Days >= 20) {score += 1.5;}
+    else if (metrics.closedIssuesLast30Days >= 10) {score += 1;}
+    else if (metrics.closedIssuesLast30Days >= 5) {score += 0.5;}
 
     // Team activity score (10% weight)
-    if (metrics.activeContributors >= 5) score += 1;
-    else if (metrics.activeContributors >= 3) score += 0.5;
+    if (metrics.activeContributors >= 5) {score += 1;}
+    else if (metrics.activeContributors >= 3) {score += 0.5;}
 
     return Math.min(score, 10);
   }

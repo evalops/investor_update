@@ -1,4 +1,6 @@
-import { Transaction } from './mercuryClient';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import {
   startOfMonth,
   endOfMonth,
@@ -12,9 +14,10 @@ import {
   addDays,
   startOfWeek
 } from 'date-fns';
+
 import { logger } from '../utils/logger';
-import * as fs from 'fs';
-import * as path from 'path';
+
+import type { Transaction } from './mercuryClient';
 
 interface CategoryConfig {
   categories: {
@@ -222,7 +225,7 @@ export class MetricsCalculator {
 
       const monthTransactions = this.transactions.filter(t => {
         const dateStr = t.postedDate || t.createdAt;
-        if (!dateStr) return false;
+        if (!dateStr) {return false;}
         const transactionDate = parseISO(dateStr);
         return isWithinInterval(transactionDate, { start: monthStart, end: monthEnd });
       });
@@ -258,7 +261,7 @@ export class MetricsCalculator {
 
   private findLargestExpense(transactions: Transaction[]): { amount: number; description: string } | null {
     const expenses = transactions.filter(t => t.amount < 0);
-    if (expenses.length === 0) return null;
+    if (expenses.length === 0) {return null;}
 
     const largest = expenses.reduce((max, t) =>
       Math.abs(t.amount) > Math.abs(max.amount) ? t : max
@@ -309,46 +312,46 @@ export class MetricsCalculator {
   }
 
   private calculateAverageMonthlyBurn(recentMonths: MonthlyMetrics[]): number {
-    if (recentMonths.length === 0) return 0;
+    if (recentMonths.length === 0) {return 0;}
     const totalBurn = recentMonths.reduce((sum, m) => sum + m.netBurn, 0);
     return totalBurn / recentMonths.length;
   }
 
   private calculateAverageMonthlyRevenue(recentMonths: MonthlyMetrics[]): number {
-    if (recentMonths.length === 0) return 0;
+    if (recentMonths.length === 0) {return 0;}
     const totalRevenue = recentMonths.reduce((sum, m) => sum + m.revenue, 0);
     return totalRevenue / recentMonths.length;
   }
 
   private calculateRunway(currentBalance: number, monthlyBurn: number): number {
-    if (monthlyBurn <= 0) return Infinity;
+    if (monthlyBurn <= 0) {return Infinity;}
     return Math.floor(currentBalance / monthlyBurn);
   }
 
   private calculateMonthOverMonthGrowth(monthlyMetrics: MonthlyMetrics[]): number {
-    if (monthlyMetrics.length < 2) return 0;
+    if (monthlyMetrics.length < 2) {return 0;}
 
     const lastMonth = monthlyMetrics[monthlyMetrics.length - 1];
     const previousMonth = monthlyMetrics[monthlyMetrics.length - 2];
 
-    if (previousMonth.revenue === 0) return lastMonth.revenue > 0 ? 100 : 0;
+    if (previousMonth.revenue === 0) {return lastMonth.revenue > 0 ? 100 : 0;}
 
     return ((lastMonth.revenue - previousMonth.revenue) / previousMonth.revenue) * 100;
   }
 
   private calculateGrowthRate(monthlyMetrics: MonthlyMetrics[], metric: 'revenue' | 'expenses'): number {
-    if (monthlyMetrics.length < 2) return 0;
+    if (monthlyMetrics.length < 2) {return 0;}
 
     const values = monthlyMetrics.map(m => m[metric]);
     const firstNonZeroIndex = values.findIndex(v => v > 0);
 
-    if (firstNonZeroIndex === -1 || firstNonZeroIndex === values.length - 1) return 0;
+    if (firstNonZeroIndex === -1 || firstNonZeroIndex === values.length - 1) {return 0;}
 
     const firstValue = values[firstNonZeroIndex];
     const lastValue = values[values.length - 1];
     const months = values.length - firstNonZeroIndex - 1;
 
-    if (firstValue === 0 || months === 0) return 0;
+    if (firstValue === 0 || months === 0) {return 0;}
 
     return (Math.pow(lastValue / firstValue, 1 / months) - 1) * 100;
   }
@@ -368,7 +371,7 @@ export class MetricsCalculator {
   }
 
   private calculateMRR(recentMonths: MonthlyMetrics[]): number {
-    if (recentMonths.length === 0) return 0;
+    if (recentMonths.length === 0) {return 0;}
 
     const lastMonth = recentMonths[recentMonths.length - 1];
     const recurringRevenue = this.identifyRecurringRevenue(lastMonth.month);
@@ -382,7 +385,7 @@ export class MetricsCalculator {
 
     const monthTransactions = this.transactions.filter(t => {
       const dateStr = t.postedDate || t.createdAt;
-      if (!dateStr) return false;
+      if (!dateStr) {return false;}
       const transactionDate = parseISO(dateStr);
       return isWithinInterval(transactionDate, { start: monthStart, end: monthEnd }) &&
              t.amount > 0 &&
@@ -438,13 +441,13 @@ export class MetricsCalculator {
   }
 
   private calculateWeeklyGrowth(monthlyMetrics: MonthlyMetrics[]): number {
-    if (monthlyMetrics.length < 2) return 0;
+    if (monthlyMetrics.length < 2) {return 0;}
 
     // Convert monthly growth to weekly (approximate)
     const latestRevenue = monthlyMetrics[monthlyMetrics.length - 1]?.revenue || 0;
     const previousRevenue = monthlyMetrics[monthlyMetrics.length - 2]?.revenue || 0;
 
-    if (previousRevenue === 0) return 0;
+    if (previousRevenue === 0) {return 0;}
 
     const monthlyGrowth = (latestRevenue - previousRevenue) / previousRevenue;
     // Convert to weekly: (1 + monthly)^(1/4) - 1
@@ -452,12 +455,12 @@ export class MetricsCalculator {
   }
 
   private calculateMonthlyGrowth(monthlyMetrics: MonthlyMetrics[]): number {
-    if (monthlyMetrics.length < 2) return 0;
+    if (monthlyMetrics.length < 2) {return 0;}
 
     const latestRevenue = monthlyMetrics[monthlyMetrics.length - 1]?.revenue || 0;
     const previousRevenue = monthlyMetrics[monthlyMetrics.length - 2]?.revenue || 0;
 
-    if (previousRevenue === 0) return 0;
+    if (previousRevenue === 0) {return 0;}
 
     return (latestRevenue - previousRevenue) / previousRevenue;
   }
@@ -489,8 +492,8 @@ export class MetricsCalculator {
     const weeklyGrowthRate = this.calculateWeeklyGrowth(monthlyMetrics);
 
     let status: 'on-track' | 'behind' | 'ahead' = 'behind';
-    if (growthRate >= target) status = 'ahead';
-    else if (growthRate >= target * 0.8) status = 'on-track';
+    if (growthRate >= target) {status = 'ahead';}
+    else if (growthRate >= target * 0.8) {status = 'on-track';}
 
     return {
       name: primaryMetricName,
@@ -509,15 +512,15 @@ export class MetricsCalculator {
     let score = 1;
 
     // Weekly growth scoring (worth 60% of total score)
-    if (weeklyGrowthRate >= 0.07) score += 6; // 7% weekly = excellent
-    else if (weeklyGrowthRate >= 0.05) score += 4; // 5% weekly = good
-    else if (weeklyGrowthRate >= 0.03) score += 2; // 3% weekly = okay
-    else if (weeklyGrowthRate >= 0.01) score += 1; // 1% weekly = minimal
+    if (weeklyGrowthRate >= 0.07) {score += 6;} // 7% weekly = excellent
+    else if (weeklyGrowthRate >= 0.05) {score += 4;} // 5% weekly = good
+    else if (weeklyGrowthRate >= 0.03) {score += 2;} // 3% weekly = okay
+    else if (weeklyGrowthRate >= 0.01) {score += 1;} // 1% weekly = minimal
 
     // Monthly growth scoring (worth 40% of total score)
-    if (monthlyGrowthRate >= 0.15) score += 3; // 15% monthly = good
-    else if (monthlyGrowthRate >= 0.10) score += 2; // 10% monthly = okay
-    else if (monthlyGrowthRate >= 0.05) score += 1; // 5% monthly = minimal
+    if (monthlyGrowthRate >= 0.15) {score += 3;} // 15% monthly = good
+    else if (monthlyGrowthRate >= 0.10) {score += 2;} // 10% monthly = okay
+    else if (monthlyGrowthRate >= 0.05) {score += 1;} // 5% monthly = minimal
 
     return Math.min(score, 10);
   }
@@ -542,13 +545,13 @@ export class MetricsCalculator {
   }
 
   private calculateCompoundGrowthRate(monthlyMetrics: MonthlyMetrics[]): number {
-    if (monthlyMetrics.length < 2) return 0;
+    if (monthlyMetrics.length < 2) {return 0;}
 
     const firstRevenue = monthlyMetrics[0]?.revenue || 0;
     const lastRevenue = monthlyMetrics[monthlyMetrics.length - 1]?.revenue || 0;
     const periods = monthlyMetrics.length - 1;
 
-    if (firstRevenue === 0 || periods === 0) return 0;
+    if (firstRevenue === 0 || periods === 0) {return 0;}
 
     // CAGR formula: (Ending/Beginning)^(1/periods) - 1
     return Math.pow(lastRevenue / firstRevenue, 1 / periods) - 1;
@@ -612,23 +615,23 @@ export class MetricsCalculator {
     let velocityScore = 1;
     if (daysSinceFounding <= 7) {
       // First week scoring
-      if (totalRevenue >= 1000) velocityScore = 10;
-      else if (totalRevenue >= 500) velocityScore = 8;
-      else if (totalRevenue >= 100) velocityScore = 6;
-      else if (totalRevenue > 0) velocityScore = 4;
+      if (totalRevenue >= 1000) {velocityScore = 10;}
+      else if (totalRevenue >= 500) {velocityScore = 8;}
+      else if (totalRevenue >= 100) {velocityScore = 6;}
+      else if (totalRevenue > 0) {velocityScore = 4;}
     } else if (daysSinceFounding <= 30) {
       // First month scoring
-      if (totalRevenue >= 10000) velocityScore = 10;
-      else if (totalRevenue >= 5000) velocityScore = 8;
-      else if (totalRevenue >= 1000) velocityScore = 6;
-      else if (totalRevenue >= 100) velocityScore = 3;
+      if (totalRevenue >= 10000) {velocityScore = 10;}
+      else if (totalRevenue >= 5000) {velocityScore = 8;}
+      else if (totalRevenue >= 1000) {velocityScore = 6;}
+      else if (totalRevenue >= 100) {velocityScore = 3;}
     } else {
       // Beyond first month
       const monthlyGrowthRate = monthlyMetrics.length > 1 ? this.calculateGrowthRate(monthlyMetrics, 'revenue') : 0;
-      if (monthlyGrowthRate >= 0.20) velocityScore = 10; // 20%+ growth
-      else if (monthlyGrowthRate >= 0.15) velocityScore = 8; // 15%+ growth
-      else if (monthlyGrowthRate >= 0.10) velocityScore = 6; // 10%+ growth
-      else if (monthlyGrowthRate > 0) velocityScore = 3; // Any growth
+      if (monthlyGrowthRate >= 0.20) {velocityScore = 10;} // 20%+ growth
+      else if (monthlyGrowthRate >= 0.15) {velocityScore = 8;} // 15%+ growth
+      else if (monthlyGrowthRate >= 0.10) {velocityScore = 6;} // 10%+ growth
+      else if (monthlyGrowthRate > 0) {velocityScore = 3;} // Any growth
     }
 
     return {

@@ -1,5 +1,8 @@
-import { BaseCollector, CollectorResult } from './baseCollector';
 import { BigQuery } from '@google-cloud/bigquery';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
+
 
 export interface GCPComputeMetrics {
   gpuComputeSpend: number;

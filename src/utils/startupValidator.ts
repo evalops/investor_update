@@ -1,8 +1,9 @@
-import { logger } from './logger';
-import { validateEnvironment } from './envValidator';
-import { MercuryClient } from '../services/mercuryClient';
 import { AttioCollector } from '../collectors/attioCollector';
 import { PostHogCollector } from '../collectors/posthogCollector';
+import { MercuryClient } from '../services/mercuryClient';
+
+import { validateEnvironment } from './envValidator';
+import { logger } from './logger';
 
 export interface ValidationStatus {
   service: string;
@@ -254,8 +255,8 @@ export class StartupValidator {
   }
 
   private determineOverallHealth(summary: { healthy: number; warnings: number; errors: number; disabled: number }): 'healthy' | 'warning' | 'error' {
-    if (summary.errors > 0) return 'error';
-    if (summary.warnings > 0) return 'warning';
+    if (summary.errors > 0) {return 'error';}
+    if (summary.warnings > 0) {return 'warning';}
     return 'healthy';
   }
 

@@ -1,5 +1,8 @@
-import { BaseCollector, CollectorResult } from './baseCollector';
 import Stripe from 'stripe';
+
+import type { CollectorResult } from './baseCollector';
+import { BaseCollector } from './baseCollector';
+
 
 export interface StripeRevenueMetrics {
   mrr: number;
@@ -105,7 +108,7 @@ export class StripeCollector extends BaseCollector {
       const thisMonthRevenue = thisMonthInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
       const lastMonthRevenue = lastMonthInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
 
-      if (lastMonthRevenue === 0) return 0;
+      if (lastMonthRevenue === 0) {return 0;}
       return ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
     } catch (error) {
       // Silently return 0 - Stripe data is optional

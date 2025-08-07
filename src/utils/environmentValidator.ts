@@ -1,5 +1,5 @@
-import { validateEnvironment, ConfigurationError } from './validation';
 import { Logger } from './logger';
+import { validateEnvironment, ConfigurationError } from './validation';
 
 const logger = Logger.for('EnvironmentValidator');
 

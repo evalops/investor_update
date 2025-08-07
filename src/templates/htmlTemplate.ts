@@ -1,4 +1,4 @@
-import { InvestorUpdate } from '../services/updateGenerator';
+import type { InvestorUpdate } from '../services/updateGenerator';
 
 export function generateProfessionalHTML(update: InvestorUpdate, chartBasePath?: string): string {
   const chartsSection = chartBasePath ? `

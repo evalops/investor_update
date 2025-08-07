@@ -1,10 +1,16 @@
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { ChartConfiguration } from 'chart.js';
-import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
-import { getTheme, ChartTheme } from '../config/chartThemes';
-import { logger } from '../utils/logger';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+
+import type { ChartConfiguration } from 'chart.js';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+
+
+import type { ChartTheme } from '../config/chartThemes';
+import { getTheme } from '../config/chartThemes';
+import { logger } from '../utils/logger';
+
+import type { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
+
 
 export class ChartGenerator {
   private chartJSNodeCanvas: ChartJSNodeCanvas;
@@ -472,13 +478,13 @@ export class ChartGenerator {
 
     // Simplified MRR component estimation from revenue data
     const newMRR = metrics.monthlyMetrics.map((m, i) => {
-      if (i === 0) return m.revenue;
+      if (i === 0) {return m.revenue;}
       const growth = m.revenue - metrics.monthlyMetrics[i - 1].revenue;
       return Math.max(0, growth);
     });
 
     const existingMRR = metrics.monthlyMetrics.map((m, i) => {
-      if (i === 0) return 0;
+      if (i === 0) {return 0;}
       return Math.min(m.revenue, metrics.monthlyMetrics[i - 1].revenue);
     });
 

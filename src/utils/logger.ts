@@ -103,7 +103,7 @@ export class Logger {
     metadata?: Record<string, any>;
     duration?: number;
   } = {}): void {
-    if (!this.shouldLog(level)) return;
+    if (!this.shouldLog(level)) {return;}
 
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),

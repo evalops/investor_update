@@ -20,6 +20,8 @@
     "validate": "bun run validate-setup.ts",
     "collect-data": "bun run collect-data.ts",
     "health": "bun run src/services/healthCheck.ts",
+    "chief-of-staff": "bun run ai-chief-of-staff.ts",
+    "runway-analysis": "bun run ai-chief-of-staff.ts \"\" ./runway-reports runway-scenarios",
     "docker:build": "docker build -t investor-update .",
     "docker:run": "docker-compose up -d",
     "docker:stop": "docker-compose down",

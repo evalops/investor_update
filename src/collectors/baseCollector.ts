@@ -21,7 +21,7 @@ export abstract class BaseCollector {
 
     return Promise.race([
       promise,
-      new Promise<never>((_, reject) =>
+      new Promise<never>((_resolve, reject) =>
         setTimeout(() => reject(new Error(`Operation timed out after ${timeout}ms`)), timeout)
       )
     ]);
@@ -67,7 +67,7 @@ export abstract class BaseCollector {
   }
 
   protected isTransientError(error: any): boolean {
-    if (!error) return false;
+    if (!error) {return false;}
 
     const message = error.message?.toLowerCase() || '';
     const code = error.code;
