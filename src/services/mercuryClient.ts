@@ -1,0 +1,159 @@
+import axios, { AxiosInstance } from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+export interface Account {
+  id: string;
+  name: string;
+  kind: string;
+  status: string;
+  accountNumber: string;
+  routingNumber: string;
+  availableBalance: number;
+  currentBalance: number;
+  createdAt: string;
+}
+
+export interface Transaction {
+  id: string;
+  accountId: string;
+  amount: number;
+  status: string;
+  kind: string;
+  counterpartyName: string;
+  counterpartyId: string;
+  postedDate: string;
+  createdAt: string;
+  description: string;
+  bankDescription: string;
+  category: string;
+  dashboardLink: string;
+}
+
+export interface TransactionsResponse {
+  transactions: Transaction[];
+  hasMore: boolean;
+}
+
+export interface AccountBalance {
+  availableBalance: number;
+  currentBalance: number;
+  pendingBalance: number;
+}
+
+export class MercuryClient {
+  private client: AxiosInstance;
+
+  constructor() {
+    const apiToken = process.env.MERCURY_API_TOKEN;
+    const baseURL = process.env.MERCURY_API_BASE_URL || 'https://api.mercury.com/api/v1';
+
+    if (!apiToken) {
+      throw new Error('MERCURY_API_TOKEN not found in environment variables');
+    }
+
+    this.client = axios.create({
+      baseURL,
+      headers: {
+        'Authorization': `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  async getAccounts(): Promise<Account[]> {
+    try {
+      const response = await this.client.get('/accounts');
+      return response.data.accounts;
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
+      throw error;
+    }
+  }
+
+  async getAccount(accountId: string): Promise<Account> {
+    try {
+      const response = await this.client.get(`/account/${accountId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching account ${accountId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAccountBalance(accountId: string): Promise<AccountBalance> {
+    try {
+      const response = await this.client.get(`/account/${accountId}/balance`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching balance for account ${accountId}:`, error);
+      throw error;
+    }
+  }
+
+  async getTransactions(
+    accountId: string,
+    options: {
+      offset?: number;
+      limit?: number;
+      search?: string;
+      start?: string;
+      end?: string;
+    } = {}
+  ): Promise<TransactionsResponse> {
+    try {
+      const params = new URLSearchParams();
+
+      if (options.offset !== undefined) params.append('offset', options.offset.toString());
+      if (options.limit !== undefined) params.append('limit', options.limit.toString());
+      if (options.search) params.append('search', options.search);
+      if (options.start) params.append('start', options.start);
+      if (options.end) params.append('end', options.end);
+
+      const response = await this.client.get(`/account/${accountId}/transactions`, { params });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching transactions for account ${accountId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAllTransactions(
+    accountId: string,
+    options: {
+      search?: string;
+      start?: string;
+      end?: string;
+    } = {}
+  ): Promise<Transaction[]> {
+    const allTransactions: Transaction[] = [];
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await this.getTransactions(accountId, {
+        ...options,
+        offset,
+        limit,
+      });
+
+      allTransactions.push(...response.transactions);
+      hasMore = response.hasMore;
+      offset += limit;
+    }
+
+    return allTransactions;
+  }
+
+  async getTransaction(transactionId: string): Promise<Transaction> {
+    try {
+      const response = await this.client.get(`/transaction/${transactionId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching transaction ${transactionId}:`, error);
+      throw error;
+    }
+  }
+}

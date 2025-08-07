@@ -1,0 +1,1 @@
+/Users/jonathanhaas/investor_update/dashboards/pages/workspace_details.py

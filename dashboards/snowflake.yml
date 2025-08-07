@@ -1,0 +1,8 @@
+definition_version: 1
+
+streamlit:
+  name: evalops_dashboard
+  stage: dashboards_stage
+  query_warehouse: COMPUTE_WH
+  main_file: evalops_dashboard.py
+  title: "EvalOps Product Metrics Dashboard"

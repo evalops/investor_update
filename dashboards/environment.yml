@@ -1,0 +1,10 @@
+name: evalops_dashboard
+channels:
+  - conda-forge
+  - snowflake
+dependencies:
+  - python=3.9
+  - streamlit
+  - pandas
+  - plotly
+  - snowflake-snowpark-python

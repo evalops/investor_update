@@ -1,0 +1,34 @@
+{
+  "GPU Compute": {
+    "keywords": ["gcp", "google cloud", "compute engine", "a100", "v100", "t4", "runpod", "lambda cloud", "modal", "gpu", "nvidia"],
+    "priority": 1
+  },
+  "CPU Compute": {
+    "keywords": ["gcp", "google cloud", "n1-standard", "n2-standard", "c2-standard", "digitalocean", "linode", "compute", "cpu"],
+    "priority": 2
+  },
+  "Storage": {
+    "keywords": ["s3", "cloudflare r2", "backblaze", "storage", "database", "postgres"],
+    "priority": 3
+  },
+  "ML Tooling": {
+    "keywords": ["weights & biases", "wandb", "labelbox", "clearml", "huggingface", "openai", "anthropic"],
+    "priority": 4
+  },
+  "Software & Tools": {
+    "keywords": ["github", "gitlab", "slack", "notion", "figma", "subscription", "saas"],
+    "priority": 5
+  },
+  "Marketing & Sales": {
+    "keywords": ["marketing", "advertising", "google ads", "hubspot", "salesforce", "outreach"],
+    "priority": 6
+  },
+  "Payroll & Benefits": {
+    "keywords": ["payroll", "salary", "benefits", "healthcare", "gusto", "rippling"],
+    "priority": 7
+  },
+  "Office & Operations": {
+    "keywords": ["office", "rent", "utilities", "legal", "accounting", "insurance"],
+    "priority": 8
+  }
+}

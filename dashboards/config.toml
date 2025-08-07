@@ -1,0 +1,7 @@
+[connections.evalops]
+account = "KEXWQDG-LT12658"
+user = "jahaas"
+authenticator = "externalbrowser"
+warehouse = "COMPUTE_WH"
+database = "SNOWFLAKE"
+schema = "PUBLIC"
