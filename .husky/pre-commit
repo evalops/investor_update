@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run linting
+echo "🔍 Running ESLint..."
+bun run lint
+
+# Run TypeScript type checking
+echo "📝 Checking TypeScript types..."
+bun run typecheck
+
+# Run tests
+echo "🧪 Running tests..."
+bun test
+
+# Check for secrets
+echo "🔐 Checking for secrets..."
+if grep -r "sk-[a-zA-Z0-9]*" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude="*.test.*" .; then
+  echo "❌ Found potential secret keys in code!"
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"

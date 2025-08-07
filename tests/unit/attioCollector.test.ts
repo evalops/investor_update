@@ -27,34 +27,80 @@ test("AttioCollector - should collect customer metrics successfully", async () =
   // Mock API responses
   const mockPeopleResponse = {
     data: [
-      { id: "1", attributes: {}, created_at: "2025-07-01T10:00:00Z" },
-      { id: "2", attributes: {}, created_at: "2025-08-01T10:00:00Z" }
+      { 
+        id: {
+          workspace_id: "ws1",
+          object_id: "people",
+          record_id: "1"
+        },
+        values: {
+          name: [{ value: "John Doe", active_until: null, attribute_type: "text" }],
+          email_addresses: [{ email_address: "john@example.com", active_until: null, attribute_type: "email-address" }]
+        },
+        created_at: "2025-07-01T10:00:00Z",
+        web_url: "https://attio.com/1" 
+      },
+      { 
+        id: {
+          workspace_id: "ws1",
+          object_id: "people",
+          record_id: "2"
+        },
+        values: {
+          name: [{ value: "Jane Smith", active_until: null, attribute_type: "text" }],
+          email_addresses: [{ email_address: "jane@example.com", active_until: null, attribute_type: "email-address" }]
+        },
+        created_at: "2025-08-01T10:00:00Z",
+        web_url: "https://attio.com/2" 
+      }
     ]
   };
 
   const mockCompaniesResponse = {
     data: [
-      { id: "1", attributes: {}, created_at: "2025-07-01T10:00:00Z" }
+      { 
+        id: {
+          workspace_id: "ws1",
+          object_id: "companies",
+          record_id: "1"
+        },
+        values: {
+          name: [{ value: "Acme Corp", active_until: null, attribute_type: "text" }],
+          domains: [{ domain: "acme.com", active_until: null, attribute_type: "domain" }]
+        },
+        created_at: "2025-07-01T10:00:00Z",
+        web_url: "https://attio.com/company1" 
+      }
     ]
   };
 
   const mockDealsResponse = {
     data: [
       { 
-        id: "1", 
-        attributes: { 
-          status: { value: "won" },
-          value: { value: 5000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "1"
+        },
+        values: { 
+          status: [{ option: { title: "won" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 5000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-07-01T10:00:00Z" 
+        created_at: "2025-07-01T10:00:00Z",
+        web_url: "https://attio.com/deal1" 
       },
       { 
-        id: "2", 
-        attributes: { 
-          status: { value: "open" },
-          value: { value: 3000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "2"
+        },
+        values: { 
+          status: [{ option: { title: "open" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 3000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-08-01T10:00:00Z" 
+        created_at: "2025-08-01T10:00:00Z",
+        web_url: "https://attio.com/deal2" 
       }
     ]
   };
@@ -86,7 +132,8 @@ test("AttioCollector - should collect customer metrics successfully", async () =
 
   expect(result.source).toBe("attio");
   expect(result.error).toBeUndefined();
-  expect(result.data.totalCustomers).toBe(2);
+  expect(result.data.totalCustomers).toBe(1); // totalCustomers is based on wonDeals
+  expect(result.data.totalContacts).toBe(2); // totalContacts should be 2
   expect(result.data.totalCompanies).toBe(1);
   expect(result.data.totalDeals).toBe(2);
   expect(result.data.wonDeals).toBe(1);
@@ -121,23 +168,51 @@ test("AttioCollector - should calculate monthly new customers correctly", async 
   
   const mockResponse = {
     data: [
-      { id: "1", attributes: {}, created_at: recentDate.toISOString() },
-      { id: "2", attributes: {}, created_at: oldDate.toISOString() }
+      { 
+        id: {
+          workspace_id: "ws1",
+          object_id: "obj1",
+          record_id: "1"
+        },
+        values: {
+          name: [{ value: "Customer 1", active_until: null, attribute_type: "text" }]
+        },
+        created_at: recentDate.toISOString(),
+        web_url: "https://attio.com/1"
+      },
+      { 
+        id: {
+          workspace_id: "ws1",
+          object_id: "obj1",
+          record_id: "2"
+        },
+        values: {
+          name: [{ value: "Customer 2", active_until: null, attribute_type: "text" }]
+        },
+        created_at: oldDate.toISOString(),
+        web_url: "https://attio.com/2"
+      }
     ]
   };
 
   // Mock all the API calls needed
+  // The collect method makes these calls in parallel:
+  // 1. getContactData -> queryRecords('people')
+  // 2. getCompanyData -> queryRecords('companies')
+  // 3. getDealMetrics -> queryRecords('deals')
+  // 4. getMonthlyNewContacts -> queryRecords('people')
+  // 5. getContactGrowthRate -> queryRecords('people')
   mockFetch
-    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }) // getCustomerCount
-    .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) }) // getCompanyCount
-    .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) }) // getDealMetrics
-    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }) // getMonthlyNewCustomers
-    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }); // getCustomerGrowthRate
+    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }) // getContactData (people)
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) }) // getCompanyData (companies)
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) }) // getDealMetrics (deals)
+    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }) // getMonthlyNewContacts (people)
+    .mockResolvedValueOnce({ ok: true, json: async () => mockResponse }); // getContactGrowthRate (people)
 
   const collector = new AttioCollector();
   const result = await collector.collect();
 
-  expect(result.data.monthlyNewCustomers).toBe(1); // Only the recent customer
+  expect(result.data.monthlyNewContacts).toBe(1); // Only the recent customer
 });
 
 test("AttioCollector - should calculate average deal size correctly", async () => {
@@ -146,20 +221,30 @@ test("AttioCollector - should calculate average deal size correctly", async () =
   const mockDealsResponse = {
     data: [
       { 
-        id: "1", 
-        attributes: { 
-          status: { value: "won" },
-          value: { value: 10000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "1"
+        },
+        values: { 
+          status: [{ option: { title: "won" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 10000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-07-01T10:00:00Z" 
+        created_at: "2025-07-01T10:00:00Z",
+        web_url: "https://attio.com/deal1" 
       },
       { 
-        id: "2", 
-        attributes: { 
-          status: { value: "open" },
-          value: { value: 5000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "2"
+        },
+        values: { 
+          status: [{ option: { title: "open" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 5000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-08-01T10:00:00Z" 
+        created_at: "2025-08-01T10:00:00Z",
+        web_url: "https://attio.com/deal2" 
       }
     ]
   };
@@ -184,28 +269,43 @@ test("AttioCollector - should handle different deal status formats", async () =>
   const mockDealsResponse = {
     data: [
       { 
-        id: "1", 
-        attributes: { 
-          status: { value: "Closed Won" },
-          value: { value: 1000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "1"
+        },
+        values: { 
+          status: [{ option: { title: "Closed Won" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 1000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-07-01T10:00:00Z" 
+        created_at: "2025-07-01T10:00:00Z",
+        web_url: "https://attio.com/deal1" 
       },
       { 
-        id: "2", 
-        attributes: { 
-          status: { value: "closed lost" },
-          value: { value: 2000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "2"
+        },
+        values: { 
+          status: [{ option: { title: "closed lost" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 2000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-08-01T10:00:00Z" 
+        created_at: "2025-08-01T10:00:00Z",
+        web_url: "https://attio.com/deal2" 
       },
       { 
-        id: "3", 
-        attributes: { 
-          status: { value: "in progress" },
-          value: { value: 3000 }
+        id: {
+          workspace_id: "ws1",
+          object_id: "deals",
+          record_id: "3"
+        },
+        values: { 
+          status: [{ option: { title: "in progress" }, active_until: null, attribute_type: "select" }],
+          value: [{ currency_value: 3000, active_until: null, attribute_type: "currency" }]
         }, 
-        created_at: "2025-08-01T10:00:00Z" 
+        created_at: "2025-08-01T10:00:00Z",
+        web_url: "https://attio.com/deal3" 
       }
     ]
   };

@@ -1,9 +1,17 @@
-import { describe, it, expect, beforeEach, mock, jest } from 'bun:test';
+import { describe, it, expect, beforeEach, mock, jest, spyOn } from 'bun:test';
 import { MercuryClient } from '../../src/services/mercuryClient';
 import { MercuryAccountsResponseSchema, MercuryTransactionsResponseSchema } from '../../src/schemas/mercury';
 import axios from 'axios';
 
-// Mock axios will be handled in beforeEach
+// Mock the rate limiter and retry handler
+jest.mock('../../src/utils/rateLimiter', () => ({
+  rateLimiter: {
+    waitForLimit: jest.fn().mockResolvedValue(undefined)
+  },
+  retryHandler: {
+    withRetry: jest.fn((fn) => fn())
+  }
+}));
 
 describe('MercuryClient', () => {
   let client: MercuryClient;
@@ -15,12 +23,14 @@ describe('MercuryClient', () => {
     
     // Create a fresh mock instance
     mockAxiosInstance = {
-      get: mock(),
-      post: mock(),
+      get: jest.fn(),
+      post: jest.fn(),
       defaults: { headers: { common: {} } }
     };
     
-    (axios.create as any).mockReturnValue(mockAxiosInstance);
+    // Mock axios.create using spyOn
+    spyOn(axios, 'create').mockReturnValue(mockAxiosInstance);
+    
     client = new MercuryClient();
   });
 
