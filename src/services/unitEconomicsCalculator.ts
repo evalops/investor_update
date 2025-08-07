@@ -305,7 +305,10 @@ export class UnitEconomicsCalculator {
       const channelCAC = channelCustomers > 0 ? (spend as number) / channelCustomers : 0;
       const channelLTV = totalLTV; // Assuming same LTV across channels
       const ltvCacRatio = channelCAC > 0 ? channelLTV / channelCAC : 0;
-      const avgRevenuePerCustomer = totalCustomers > 0 ? this.calculateRevenue() / totalCustomers : 0;
+      const totalRevenue = this.transactions
+        .filter(t => t.amount > 0)
+        .reduce((sum, t) => sum + t.amount, 0);
+      const avgRevenuePerCustomer = totalCustomers > 0 ? totalRevenue / totalCustomers : 0;
       const paybackMonths = channelCAC > 0 && avgRevenuePerCustomer > 0 
         ? channelCAC / avgRevenuePerCustomer 
         : 0; // Simplified payback calculation

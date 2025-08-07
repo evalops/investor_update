@@ -7,5 +7,5 @@ try {
   const result = await collector.collect();
   console.log('✅ Snowflake collector result:', result);
 } catch (error) {
-  console.log('❌ Snowflake collector error:', error.message);
+  console.log('❌ Snowflake collector error:', (error as Error).message);
 }
