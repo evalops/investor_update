@@ -431,7 +431,7 @@ export class NarrativeGenerator {
   }
 
   private inferMarketContext(): string {
-    // This could be enhanced with actual market data or user configuration
+    // This could be expanded with actual market data or user configuration
     return 'a large, growing market opportunity in enterprise software';
   }
 

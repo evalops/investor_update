@@ -1,9 +1,8 @@
 import { StartupMetrics, EvalOpsMetrics } from './metricsCalculator';
-import { EnhancedMetrics } from './metricsAggregator';
+import { Metrics } from './metricsAggregator';
 import { format } from 'date-fns';
-import { generateProfessionalHTML } from '../templates/modernTemplate';
-import { generateYCEmailUpdate } from '../templates/ycTemplate';
-import { generateEnhancedYCEmailUpdate } from '../templates/enhancedYcTemplate';
+import { generateProfessionalHTML } from '../templates/htmlTemplate';
+import { generateEmailUpdate } from '../templates/template';
 
 
 export interface InvestorUpdate {
@@ -431,11 +430,7 @@ export class UpdateGenerator {
     return generateProfessionalHTML(update, chartBasePath);
   }
 
-  formatUpdateAsYCEmail(update: InvestorUpdate, metrics: StartupMetrics | EvalOpsMetrics): string {
-    return generateYCEmailUpdate(update, metrics);
-  }
-
-  formatUpdateAsEnhancedYCEmail(update: InvestorUpdate, metrics: EnhancedMetrics): string {
-    return generateEnhancedYCEmailUpdate(update, metrics);
+  formatUpdateAsEmail(update: InvestorUpdate, metrics: Metrics): string {
+    return generateEmailUpdate(update, metrics);
   }
 }

@@ -11,7 +11,7 @@ import { NarrativeGenerator, NarrativeInsights } from './narrativeGenerator';
 import { Transaction } from './mercuryClient';
 
 
-export interface EnhancedMetrics extends EvalOpsMetrics {
+export interface Metrics extends EvalOpsMetrics {
   githubMetrics?: GitHubMetrics;
   posthogMetrics?: PostHogMetrics;
   attioMetrics?: AttioMetrics;
@@ -102,7 +102,7 @@ export class MetricsAggregator {
     return { metrics: evalOpsMetrics, dataSourceStatus };
   }
 
-  async aggregateEnhancedMetrics(baseMetrics: StartupMetrics, transactions: Transaction[]): Promise<{ metrics: EnhancedMetrics; dataSourceStatus: { [key: string]: { connected: boolean; error?: string } } }> {
+  async aggregateMetrics(baseMetrics: StartupMetrics, transactions: Transaction[]): Promise<{ metrics: Metrics; dataSourceStatus: { [key: string]: { connected: boolean; error?: string } } }> {
     // Get base EvalOps metrics first
     const { metrics: evalOpsMetrics, dataSourceStatus } = await this.aggregateEvalOpsMetrics(baseMetrics);
 
@@ -159,7 +159,7 @@ export class MetricsAggregator {
       // Silently skip narrative generation if data is invalid
     }
 
-    const enhancedMetrics: EnhancedMetrics = {
+    const metrics: Metrics = {
       ...evalOpsMetrics,
       githubMetrics: githubData.data,
       posthogMetrics: posthogData.data,
@@ -169,7 +169,7 @@ export class MetricsAggregator {
       narrativeInsights
     };
 
-    return { metrics: enhancedMetrics, dataSourceStatus };
+    return { metrics, dataSourceStatus };
   }
 
   private calculateGrossMargin(monthlyRevenue: number, monthlyComputeSpend: number): number {

@@ -6,12 +6,13 @@ import { MercuryClient } from './src/services/mercuryClient';
 import { MetricsCalculator } from './src/services/metricsCalculator';
 import { UpdateGenerator } from './src/services/updateGenerator';
 import { ChartGenerator } from './src/services/chartGenerator';
-import { MetricsAggregator, EnhancedMetrics } from './src/services/metricsAggregator';
+import { MetricsAggregator, Metrics } from './src/services/metricsAggregator';
 import { printConfigurationHelp, validateConfiguration } from './src/utils/configurationHelper';
 import { validateConfig, ValidationError, APIError, formatError, withRetry } from './src/utils/validation';
 import { Logger } from './src/utils/logger';
 import { validateEnvironmentVariables, testDataSourceConnections, ensureRequiredEnvironment } from './src/utils/environmentValidator';
 import { runConfigurationWizard } from './src/utils/configWizard';
+import { format } from 'date-fns';
 
 const logger = Logger.for('InvestorUpdate');
 
@@ -198,8 +199,8 @@ async function generateReport(): Promise<void> {
     const calculator = new MetricsCalculator(transactions);
     const baseResult = await calculator.calculateEvalOpsMetrics(account.currentBalance, config.months);
 
-    console.log('🔄 Aggregating enhanced metrics from all data sources...');
-    const enrichedResult = await metricsAggregator.aggregateEnhancedMetrics(baseResult.metrics, transactions);
+    console.log('🔄 Aggregating metrics from all data sources...');
+    const enrichedResult = await metricsAggregator.aggregateMetrics(baseResult.metrics, transactions);
     const metrics = enrichedResult.metrics;
 
     // Log data source status
@@ -257,10 +258,12 @@ async function generateReport(): Promise<void> {
     }
 
     if (config.format === 'yc-email' || config.format === 'all') {
-      console.log('📧 Generating enhanced YC-style email update...');
-      const ycEmail = updateGenerator.formatUpdateAsEnhancedYCEmail(update, metrics);
-      await fs.writeFile(path.join(config.outputDir, 'yc-email-update.txt'), ycEmail);
-      console.log('✅ Enhanced YC email update saved to yc-email-update.txt');
+      console.log('📧 Generating email update...');
+      const email = updateGenerator.formatUpdateAsEmail(update, metrics);
+      const dateStr = format(new Date(), 'yyyy-MM');
+      const emailFileName = `email-update-${dateStr}.txt`;
+      await fs.writeFile(path.join(config.outputDir, emailFileName), email);
+      console.log(`✅ Email update saved to ${emailFileName}`);
     }
 
     if (config.format === 'json' || config.format === 'all') {

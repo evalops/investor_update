@@ -1,7 +1,8 @@
 import { InvestorUpdate } from '../services/updateGenerator';
-import { EnhancedMetrics } from '../services/metricsAggregator';
+import { Metrics } from '../services/metricsAggregator';
+import { AttioMetrics } from '../collectors/attioCollector';
 
-export function generateEnhancedYCEmailUpdate(update: InvestorUpdate, metrics: EnhancedMetrics): string {
+export function generateEmailUpdate(update: InvestorUpdate, metrics: Metrics): string {
   const companyName = "EvalOps";
   const month = update.period.split(' ')[0] || new Date().toLocaleString('default', { month: 'long' });
 
@@ -55,6 +56,14 @@ Best,
 📱 Product Usage: ${metrics.posthogMetrics.monthlyActiveUsers} MAU, ${stickiness}% stickiness, ${metrics.posthogMetrics.customerHealthScore}/10 health`;
   }
 
+  // Add early-stage prospect metrics if Attio data is available
+  if (metrics.attioMetrics && metrics.attioMetrics.totalContacts > 0) {
+    const prospectSection = generateProspectMetrics(metrics.attioMetrics);
+    if (prospectSection) {
+      email += `\n${prospectSection}`;
+    }
+  }
+
   // Add engineering metrics section if GitHub data is available
   if (metrics.githubMetrics) {
     email += `
@@ -83,7 +92,7 @@ Full dashboard: [link to detailed report]`;
   return email;
 }
 
-function generateKeyMetricsSection(metrics: EnhancedMetrics): string {
+function generateKeyMetricsSection(metrics: Metrics): string {
   let section = `⭐ ${metrics.primaryMetric.name}: ${formatDisplayValue(metrics.primaryMetric.value)} (${formatGrowthRate(metrics.primaryMetric.growthRate)} MoM)`;
   section += `\n🏦 Cash: ${formatDisplayValue(metrics.currentBalance)} (${formatRunway(metrics.runwayMonths)})`;
 
@@ -95,7 +104,7 @@ function generateKeyMetricsSection(metrics: EnhancedMetrics): string {
   return section;
 }
 
-function generateHighlights(metrics: EnhancedMetrics, update: InvestorUpdate): string {
+function generateHighlights(metrics: Metrics, update: InvestorUpdate): string {
   // Use AI-generated highlights if available
   if (metrics.narrativeInsights?.keyHighlights.length) {
     return metrics.narrativeInsights.keyHighlights.slice(0, 4).map(h => `• ${h}`).join('\n');
@@ -105,7 +114,7 @@ function generateHighlights(metrics: EnhancedMetrics, update: InvestorUpdate): s
   return update.highlights.slice(0, 4).map(h => `• ${h}`).join('\n');
 }
 
-function generateChallenges(metrics: EnhancedMetrics, update: InvestorUpdate): string {
+function generateChallenges(metrics: Metrics, update: InvestorUpdate): string {
   // Use AI-generated challenges if available
   if (metrics.narrativeInsights?.challengesAndConcerns.length) {
     return metrics.narrativeInsights.challengesAndConcerns.slice(0, 3).map(c => `• ${c}`).join('\n');
@@ -115,7 +124,7 @@ function generateChallenges(metrics: EnhancedMetrics, update: InvestorUpdate): s
   return update.concerns.slice(0, 3).map(c => `• ${c}`).join('\n');
 }
 
-function determineSentiment(metrics: EnhancedMetrics): string {
+function determineSentiment(metrics: Metrics): string {
   const growthScore = metrics.ycGrowthScore;
   const primaryStatus = metrics.primaryMetric.status;
 
@@ -128,7 +137,7 @@ function determineSentiment(metrics: EnhancedMetrics): string {
   }
 }
 
-function generateIntelligentAsks(metrics: EnhancedMetrics, update: InvestorUpdate): string[] {
+function generateIntelligentAsks(metrics: Metrics, update: InvestorUpdate): string[] {
   const asks: string[] = [];
 
   // Use AI-generated actionable insights if available
@@ -216,7 +225,7 @@ function formatFoundingDate(date: Date): string {
   });
 }
 
-function generateMilestonesSection(metrics: EnhancedMetrics): string {
+function generateMilestonesSection(metrics: Metrics): string {
   const milestones = [];
 
   // First Revenue
@@ -265,4 +274,42 @@ function formatTargetDate(date?: Date): string {
 function formatProgress(current: number, target: number): string {
   const percentage = Math.min((current / target) * 100, 100);
   return `${percentage.toFixed(0)}% there`;
+}
+
+function generateProspectMetrics(attioMetrics: AttioMetrics): string {
+  // Early-stage companies focus on pipeline building rather than revenue
+  const sections = [];
+  
+  // True customers vs prospects distinction
+  if (attioMetrics.totalCustomers > 0) {
+    sections.push(`🎯 Paying Customers: ${attioMetrics.totalCustomers} ($${Math.round(attioMetrics.totalRevenue).toLocaleString()} revenue)`);
+  }
+  
+  // Prospect pipeline metrics (the real early-stage focus)
+  const pipelineMetrics = [];
+  pipelineMetrics.push(`${attioMetrics.totalContacts} prospects`);
+  pipelineMetrics.push(`${attioMetrics.activeConversations} active conversations`);
+  
+  if (attioMetrics.recentConversations > 0) {
+    pipelineMetrics.push(`${attioMetrics.recentConversations} recent talks`);
+  }
+  
+  if (attioMetrics.strongConnections > 0) {
+    pipelineMetrics.push(`${attioMetrics.strongConnections} strong connections`);
+  }
+  
+  sections.push(`📞 Pipeline: ${pipelineMetrics.join(', ')}`);
+  
+  // Growth metrics for early stage
+  if (attioMetrics.monthlyNewContacts > 0) {
+    sections.push(`📈 New Contacts: ${attioMetrics.monthlyNewContacts} this month`);
+  }
+  
+  // Company network (important for B2B early stage)
+  if (attioMetrics.topCompanies && attioMetrics.topCompanies.length > 0) {
+    const topCompanyNames = attioMetrics.topCompanies.slice(0, 3).map(c => c.name).join(', ');
+    sections.push(`🏢 Key Companies: ${topCompanyNames}`);
+  }
+  
+  return sections.join('\n');
 }

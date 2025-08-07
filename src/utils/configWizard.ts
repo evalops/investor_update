@@ -51,7 +51,7 @@ const CONFIGURATION_STEPS: WizardStep[] = [
   {
     id: 'snowflake_setup',
     title: 'Snowflake Data Warehouse (Optional)',
-    description: 'Enhanced analytics and custom metrics from your data warehouse',
+    description: 'Analytics and custom metrics from your data warehouse',
     envVar: 'SNOWFLAKE_ACCOUNT',
     required: false,
     type: 'text',
