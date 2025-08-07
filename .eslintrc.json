@@ -59,7 +59,8 @@
     "jest/expect-expect": "off",
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
-    "jest/valid-expect": "error"
+    "jest/valid-expect": "error",
+    "jest/no-deprecated-functions": "off"
   },
   "ignorePatterns": [
     "dist/",

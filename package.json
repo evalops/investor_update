@@ -18,6 +18,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "validate": "bun run validate-setup.ts",
+    "collect-data": "bun run collect-data.ts",
     "health": "bun run src/services/healthCheck.ts",
     "docker:build": "docker build -t investor-update .",
     "docker:run": "docker-compose up -d",

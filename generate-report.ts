@@ -13,6 +13,8 @@ import { Logger } from './src/utils/logger';
 import { validateEnvironmentVariables, testDataSourceConnections, ensureRequiredEnvironment } from './src/utils/environmentValidator';
 import { runConfigurationWizard } from './src/utils/configWizard';
 import { StartupValidator } from './src/utils/startupValidator';
+import { DataCollectionService } from './src/services/dataCollectionService';
+import { HistoricalTracker } from './src/services/historicalTrackerSimple';
 import { format } from 'date-fns';
 
 const logger = Logger.for('InvestorUpdate');
@@ -185,16 +187,42 @@ async function generateReport(): Promise<void> {
 
   try {
     // Initialize services
-    const mercuryClient = new MercuryClient();
+    const dataCollectionService = new DataCollectionService();
     const updateGenerator = new UpdateGenerator();
     const chartGenerator = new ChartGenerator();
     const metricsAggregator = new MetricsAggregator();
 
-    console.log('🔄 Fetching account data...');
-    const [account, transactions] = await Promise.all([
-      mercuryClient.getAccount(config.accountId),
-      mercuryClient.getAllTransactions(config.accountId)
-    ]);
+    // Use reliable data collection instead of direct API calls
+    console.log('🔄 Collecting data from all sources...');
+    const dataResults = await dataCollectionService.collectAllData(30); // Max 30 minutes old
+    const summary = dataCollectionService.generateSummary(dataResults);
+
+    // Show data collection status
+    console.log('📊 Data Collection Status:');
+    dataResults.forEach(result => {
+      const icon = result.status === 'success' ? '✅' 
+                 : result.status === 'stale' ? '🕐' 
+                 : '❌';
+      console.log(`  ${icon} ${result.source} - ${result.dataAge || 'unknown age'}`);
+      if (result.error) {
+        console.log(`     Error: ${result.error}`);
+      }
+    });
+
+    // Show recommendations if any
+    if (summary.recommendations.length > 0) {
+      console.log('\n⚠️  Data Quality Notes:');
+      summary.recommendations.forEach(rec => console.log(`   • ${rec}`));
+    }
+
+    // Extract Mercury data from collection results
+    const mercuryResult = dataResults.find(r => r.source === 'mercury');
+    if (!mercuryResult || mercuryResult.status === 'error') {
+      throw new Error('Mercury banking data is required but unavailable. Please check your API connection.');
+    }
+
+    const { accounts, primaryAccount, transactions } = mercuryResult.data;
+    const account = accounts.find((a: any) => a.id === config.accountId) || primaryAccount;
 
     if (!account) {
       throw new Error('Account not found');
@@ -214,6 +242,38 @@ async function generateReport(): Promise<void> {
     console.log('🔄 Aggregating metrics from all data sources...');
     const enrichedResult = await metricsAggregator.aggregateMetrics(baseResult.metrics, transactions);
     const metrics = enrichedResult.metrics;
+
+    // Store historical snapshot and analyze trends
+    console.log('📊 Saving historical snapshot...');
+    const historicalTracker = new HistoricalTracker();
+    await historicalTracker.saveSnapshot(metrics);
+    
+    const trends = await historicalTracker.analyzeTrends(6);
+    const milestones = await historicalTracker.getMilestones();
+    const historyStats = await historicalTracker.getStats();
+    
+    if (trends.length > 0) {
+      console.log('📈 Historical Analysis:');
+      trends.slice(0, 3).forEach(trend => {
+        const arrow = trend.trend === 'up' ? '📈' 
+                    : trend.trend === 'down' ? '📉' 
+                    : trend.trend === 'flat' ? '➡️' : '🆕';
+        const changeText = trend.change_percent !== undefined 
+          ? ` (${trend.change_percent > 0 ? '+' : ''}${trend.change_percent.toFixed(1)}%)`
+          : '';
+        console.log(`  ${arrow} ${trend.metric}: ${formatDisplayValue(trend.current_value)}${changeText}`);
+      });
+    }
+    
+    if (milestones.length > 0) {
+      console.log(`🏆 Recent milestones: ${milestones.slice(0, 2).map(m => m.milestone_name).join(', ')}`);
+    }
+    
+    console.log(`📅 Historical data: ${historyStats.totalSnapshots} months tracked`);
+    
+    // Add trends to metrics for template use
+    (metrics as any).trends = trends;
+    (metrics as any).milestones = milestones;
 
     // Log data source status
     console.log('📡 Data source status:');
