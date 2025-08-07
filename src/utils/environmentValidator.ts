@@ -226,9 +226,7 @@ export async function testDataSourceConnections(): Promise<EnvironmentValidation
         if (testResult.success) {
           logger.info(`✅ Connection test passed: ${dataSource.name}`);
         } else {
-          logger.warn(`❌ Connection test failed: ${dataSource.name}`, undefined, {
-            error: testResult.error
-          });
+          logger.warn(`❌ Connection test failed: ${dataSource.name}: ${testResult.error}`);
         }
       } catch (error) {
         dataSource.testResult = 'failed';

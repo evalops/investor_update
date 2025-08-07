@@ -72,12 +72,12 @@ export interface StartupMetrics {
   foundingDate: Date;
   daysSinceFounding: number;
   timeToMilestones: {
-    firstRevenue?: { achieved: boolean; days?: number; target: Date };
-    first1K?: { achieved: boolean; days?: number; target: Date };
-    first10K?: { achieved: boolean; days?: number; target: Date };
-    first100K?: { achieved: boolean; days?: number; target: Date };
-    firstCustomer?: { achieved: boolean; days?: number; target: Date };
-    break_even?: { achieved: boolean; days?: number; target: Date };
+    firstRevenue?: { achieved: boolean; days?: number; target?: Date };
+    first1K?: { achieved: boolean; days?: number; target?: Date };
+    first10K?: { achieved: boolean; days?: number; target?: Date };
+    first100K?: { achieved: boolean; days?: number; target?: Date };
+    firstCustomer?: { achieved: boolean; days?: number; target?: Date };
+    break_even?: { achieved: boolean; days?: number; target?: Date };
   };
   aggressiveGrowthMetrics: {
     dailyGrowthRate: number;

@@ -67,7 +67,7 @@ export class GCPCollector extends BaseCollector {
       location: 'US'
     };
 
-    const [rows] = await this.bigquery.query(options);
+    const [rows] = await this.bigquery!.query(options);
     return rows;
   }
 

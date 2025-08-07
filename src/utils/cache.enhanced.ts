@@ -291,10 +291,14 @@ export class CacheManager {
     // Evict old entries if needed
     while (this.currentMemorySize + size > this.maxMemorySize && this.memoryCache.size > 0) {
       const firstKey = this.memoryCache.keys().next().value;
-      const evicted = this.memoryCache.get(firstKey);
-      if (evicted) {
-        this.currentMemorySize -= this.getSize(evicted.data);
-        this.memoryCache.delete(firstKey);
+      if (firstKey) {
+        const evicted = this.memoryCache.get(firstKey);
+        if (evicted) {
+          this.currentMemorySize -= this.getSize(evicted.data);
+          this.memoryCache.delete(firstKey);
+        }
+      } else {
+        break;
       }
     }
     

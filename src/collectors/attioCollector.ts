@@ -89,7 +89,7 @@ export class AttioCollector extends BaseCollector {
 
   constructor() {
     super();
-    this.apiKey = process.env.ATTIO_API_KEY;
+    this.apiKey = process.env.ATTIO_API_KEY || null;
     this.isConfigured = !!this.apiKey;
   }
 

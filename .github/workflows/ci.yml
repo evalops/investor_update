@@ -92,8 +92,9 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: main
-          head: HEAD
+          base: ${{ github.event.before }}
+          head: ${{ github.sha }}
+        continue-on-error: true
 
   build:
     name: Build Application

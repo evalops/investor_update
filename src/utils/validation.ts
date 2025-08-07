@@ -4,9 +4,7 @@ import { z } from 'zod';
 export const ConfigSchema = z.object({
   accountId: z.string().min(1, "Account ID is required"),
   months: z.number().min(1, "Months must be at least 1").max(36, "Months cannot exceed 36"),
-  format: z.enum(['markdown', 'html', 'json', 'yc-email', 'all'], {
-    errorMap: () => ({ message: "Format must be one of: markdown, html, json, yc-email, all" })
-  }),
+  format: z.enum(['markdown', 'html', 'json', 'yc-email', 'all']),
   outputDir: z.string().min(1, "Output directory is required")
 });
 
