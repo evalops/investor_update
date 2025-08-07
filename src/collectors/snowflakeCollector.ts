@@ -20,13 +20,14 @@ export class SnowflakeCollector extends BaseCollector {
   }
 
   private checkConfiguration(): void {
-    const hasCredentials =
-      process.env.SNOWFLAKE_ACCOUNT ||
-      process.env.SNOWFLAKE_TOKEN ||
-      process.env.SNOWFLAKE_PASSWORD ||
-      process.env.SNOWFLAKE_AUTHENTICATOR === 'externalbrowser';
+    const hasRequiredConfig = 
+      process.env.SNOWFLAKE_ACCOUNT &&
+      process.env.SNOWFLAKE_USER &&
+      (process.env.SNOWFLAKE_PASSWORD ||
+       process.env.SNOWFLAKE_TOKEN ||
+       process.env.SNOWFLAKE_AUTHENTICATOR === 'externalbrowser');
 
-    this.isConfigured = !!hasCredentials;
+    this.isConfigured = !!hasRequiredConfig;
   }
 
   private async connect(): Promise<any> {
@@ -36,11 +37,17 @@ export class SnowflakeCollector extends BaseCollector {
     const useExternalBrowser = process.env.SNOWFLAKE_AUTHENTICATOR === 'externalbrowser';
 
     return new Promise((resolve, reject) => {
+      // Validate required configuration
+      if (!process.env.SNOWFLAKE_ACCOUNT || !process.env.SNOWFLAKE_USER) {
+        reject(new Error('Missing required Snowflake configuration: SNOWFLAKE_ACCOUNT and SNOWFLAKE_USER are required'));
+        return;
+      }
+
       const connectionConfig: any = {
-        account: process.env.SNOWFLAKE_ACCOUNT || 'KEXWQDG-LT12658',
-        username: process.env.SNOWFLAKE_USER || 'jahaas',
+        account: process.env.SNOWFLAKE_ACCOUNT,
+        username: process.env.SNOWFLAKE_USER,
         warehouse: process.env.SNOWFLAKE_WAREHOUSE || 'COMPUTE_WH',
-        database: process.env.SNOWFLAKE_DATABASE || 'SNOWFLAKE',
+        database: process.env.SNOWFLAKE_DATABASE || 'EVALOPS',
         schema: process.env.SNOWFLAKE_SCHEMA || 'PUBLIC',
         role: process.env.SNOWFLAKE_ROLE || 'ACCOUNTADMIN'
       };

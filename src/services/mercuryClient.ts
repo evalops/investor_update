@@ -1,7 +1,19 @@
 import axios, { AxiosInstance } from 'axios';
 import * as dotenv from 'dotenv';
+import { z } from 'zod';
+import { 
+  MercuryAccountSchema, 
+  MercuryTransactionSchema,
+  MercuryAccountsResponseSchema,
+  MercuryTransactionsResponseSchema,
+  type MercuryAccount,
+  type MercuryTransaction 
+} from '../schemas/mercury';
+import { Logger } from '../utils/logger';
 
 dotenv.config();
+
+const logger = Logger.for('MercuryClient');
 
 export interface Account {
   id: string;
@@ -65,9 +77,17 @@ export class MercuryClient {
   async getAccounts(): Promise<Account[]> {
     try {
       const response = await this.client.get('/accounts');
-      return response.data.accounts;
+      
+      // Validate response data
+      const validated = MercuryAccountsResponseSchema.safeParse(response.data);
+      if (!validated.success) {
+        logger.error('Invalid Mercury accounts response', validated.error);
+        throw new Error('Invalid response from Mercury API');
+      }
+      
+      return validated.data.accounts as Account[];
     } catch (error) {
-      console.error('Error fetching accounts:', error);
+      logger.error('Error fetching accounts:', error as Error);
       throw error;
     }
   }
@@ -75,9 +95,17 @@ export class MercuryClient {
   async getAccount(accountId: string): Promise<Account> {
     try {
       const response = await this.client.get(`/account/${accountId}`);
-      return response.data;
+      
+      // Validate response data
+      const validated = MercuryAccountSchema.safeParse(response.data);
+      if (!validated.success) {
+        logger.error(`Invalid Mercury account response for ${accountId}`, validated.error);
+        throw new Error('Invalid response from Mercury API');
+      }
+      
+      return validated.data as Account;
     } catch (error) {
-      console.error(`Error fetching account ${accountId}:`, error);
+      logger.error(`Error fetching account ${accountId}:`, error as Error);
       throw error;
     }
   }
@@ -87,7 +115,7 @@ export class MercuryClient {
       const response = await this.client.get(`/account/${accountId}/balance`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching balance for account ${accountId}:`, error);
+      logger.error(`Error fetching balance for account ${accountId}:`, error as Error);
       throw error;
     }
   }
@@ -112,9 +140,17 @@ export class MercuryClient {
       if (options.end) params.append('end', options.end);
 
       const response = await this.client.get(`/account/${accountId}/transactions`, { params });
-      return response.data;
+      
+      // Validate response data
+      const validated = MercuryTransactionsResponseSchema.safeParse(response.data);
+      if (!validated.success) {
+        logger.error(`Invalid Mercury transactions response for ${accountId}`, validated.error);
+        throw new Error('Invalid response from Mercury API');
+      }
+      
+      return validated.data as TransactionsResponse;
     } catch (error) {
-      console.error(`Error fetching transactions for account ${accountId}:`, error);
+      logger.error(`Error fetching transactions for account ${accountId}:`, error as Error);
       throw error;
     }
   }
@@ -152,7 +188,7 @@ export class MercuryClient {
       const response = await this.client.get(`/transaction/${transactionId}`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching transaction ${transactionId}:`, error);
+      logger.error(`Error fetching transaction ${transactionId}:`, error as Error);
       throw error;
     }
   }
