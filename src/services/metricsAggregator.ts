@@ -149,10 +149,10 @@ export class MetricsAggregator {
     try {
       const narrativeGenerator = new NarrativeGenerator(
         evalOpsMetrics,
-        githubData.data,
+        githubData.data || undefined,
         cohortMetrics,
         unitEconomics,
-        posthogData.data
+        posthogData.data || undefined
       );
       narrativeInsights = narrativeGenerator.generateNarrative();
     } catch (error) {
@@ -161,9 +161,9 @@ export class MetricsAggregator {
 
     const metrics: Metrics = {
       ...evalOpsMetrics,
-      githubMetrics: githubData.data,
-      posthogMetrics: posthogData.data,
-      attioMetrics: attioData.data,
+      githubMetrics: githubData.data || undefined,
+      posthogMetrics: posthogData.data || undefined,
+      attioMetrics: attioData.data || undefined,
       cohortMetrics,
       unitEconomics,
       narrativeInsights

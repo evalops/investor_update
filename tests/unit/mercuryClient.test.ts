@@ -1,18 +1,9 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, mock, jest } from 'bun:test';
 import { MercuryClient } from '../../src/services/mercuryClient';
 import { MercuryAccountsResponseSchema, MercuryTransactionsResponseSchema } from '../../src/schemas/mercury';
 import axios from 'axios';
 
-// Mock axios
-mock.module('axios', () => ({
-  default: {
-    create: mock(() => ({
-      get: mock(),
-      post: mock(),
-      defaults: { headers: { common: {} } }
-    }))
-  }
-}));
+// Mock axios will be handled in beforeEach
 
 describe('MercuryClient', () => {
   let client: MercuryClient;

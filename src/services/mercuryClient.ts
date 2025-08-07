@@ -147,7 +147,7 @@ export class MercuryClient {
         throw new Error('Invalid response from Mercury API');
       }
       
-      return validated.data as TransactionsResponse;
+      return response.data;
     } catch (error) {
       logger.error(`Error fetching transactions for account ${accountId}:`, error as Error);
       throw error;
