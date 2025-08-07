@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import 'dotenv/config';
+
 /**
  * Quick validation script to test all API connections and configuration
  * Usage: bun run validate-setup.ts

@@ -1,8 +1,8 @@
 # EvalOps Investor Update CLI
 
-Simple CLI tool to generate comprehensive investor reports from Mercury Banking, Snowflake, Stripe, and GCP.
+Advanced CLI tool with **AI Chief of Staff** that generates comprehensive investor reports and strategic guidance from Mercury Banking, Snowflake, Stripe, and other business data sources.
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # Install dependencies
@@ -12,83 +12,110 @@ bun install
 cp .env.example .env
 # Edit .env with your API keys
 
-# Generate report
-bun run generate
+# Test your setup
+bun run test-env-setup.ts
+
+# Run AI Chief of Staff
+bun run ai-chief-agents.ts
+
+# Generate full report
+bun run generate-report.ts
 ```
 
-## Usage
+## 🤖 AI Chief of Staff
+
+Our multi-agent AI system provides strategic guidance tailored to your startup stage:
 
 ```bash
-# Basic usage (markdown report, 6 months, default account)
-bun run generate
+# Multi-agent AI analysis
+bun run ai-chief-agents.ts
+```
 
-# Advanced usage
+**Features:**
+- **Financial Analyst Agent**: Assesses cash situation and runway risks
+- **Strategy Advisor Agent**: Creates actionable plans and priorities
+- **Customer Development Expert**: Guides validation and growth
+- **Chief of Staff Orchestrator**: Synthesizes insights into comprehensive guidance
+
+**Perfect for early-stage startups** - provides specific, actionable advice based on your financial situation and stage.
+
+## 📊 Investor Reports
+
+```bash
+# Generate comprehensive investor reports
 bun run generate-report.ts [accountId] [months] [format] [outputDir]
 
 # Examples
-bun run generate-report.ts "" 12 all ./reports
-bun run generate-report.ts "" 3 html
+bun run generate-report.ts "" 12 all ./reports    # Annual report, all formats
+bun run generate-report.ts "" 3 html              # Quarterly HTML report
 ```
 
-### Parameters
-- **accountId** - Mercury account ID (uses `EVALOPS_MERCURY_ACCOUNT_ID` from .env if empty)
-- **months** - Number of months to analyze (default: 6)
-- **format** - Output format: `markdown`, `html`, `json`, or `all` (default: markdown)
-- **outputDir** - Output directory (default: ./report-output)
-
-## Environment Variables
+## 🔧 Environment Setup
 
 ### Required
 ```bash
+# Mercury Banking (required for financial data)
 MERCURY_API_TOKEN=your_mercury_api_token_here
 EVALOPS_MERCURY_ACCOUNT_ID=your_default_account_id
+
+# OpenAI (required for AI Chief of Staff)
+OPENAI_API_KEY=sk-proj-your_openai_api_key_here
 ```
 
 ### Optional (for enhanced metrics)
 ```bash
-# Snowflake
-SNOWFLAKE_ACCOUNT=your_account
-SNOWFLAKE_USER=evalops_readonly_user
-SNOWFLAKE_PASSWORD=your_password
-SNOWFLAKE_WAREHOUSE=PROD_WH
-SNOWFLAKE_DATABASE=PROD_DB
-SNOWFLAKE_SCHEMA=PUBLIC
+# Stripe (payment data)
+STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
 
-# Stripe
-STRIPE_API_KEY=sk_live_your_stripe_secret_key
+# PostHog (product analytics)
+POSTHOG_API_KEY=phx_your_posthog_api_key
 
-# Google Cloud Platform
-GCP_PROJECT_ID=your_gcp_project_id
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
+# Attio (CRM data)
+ATTIO_API_KEY=your_attio_api_key
+
+# Snowflake (data warehouse)
+SNOWFLAKE_OAUTH_TOKEN=your_snowflake_token
 ```
 
-## Output Files
+## 📋 Available Scripts
 
-- `investor-update.md` - Professional markdown report
-- `investor-update.html` - Styled HTML report
-- `metrics.json` - Raw metrics data
-- `update.json` - Structured update content
-- Charts (PNG) - Revenue, burn rate, and growth visualizations
+### Core Functionality
+- **`ai-chief-agents.ts`** - Multi-agent AI Chief of Staff analysis ⭐
+- **`generate-report.ts`** - Comprehensive investor reports with charts
+- **`collect-data.ts`** - Background data collection from all sources
+- **`validate-setup.ts`** - Validate API connections and configuration
 
-## Key Metrics
+### Testing & Validation
+- **`test-env-setup.ts`** - Test environment variable setup
 
-- Monthly Recurring Revenue (MRR)
-- Revenue Growth Rate
-- Monthly Burn Rate
-- Runway (months)
-- Active Users
-- API Call Volume
-- Customer metrics
+## 📈 What You Get
 
-## Examples
+### AI Chief of Staff Reports
+- Strategic analysis based on your startup stage
+- Specific action items and timelines
+- Early warning systems for cash flow issues
+- Customer development guidance
+- Saved to `./chief-of-staff-reports/`
 
-```bash
-# Quick report
-bun run generate
+### Investor Reports
+- Professional markdown and HTML reports
+- Financial charts and visualizations
+- Key startup metrics (MRR, burn rate, runway)
+- Growth analysis and projections
+- Saved to `./report-output/`
 
-# Annual report with all formats
-bun run generate-report.ts "" 12 all ./annual-report
+## 🎯 Key Metrics Tracked
 
-# Quarterly HTML report
-bun run generate-report.ts "" 3 html ./q4-report
-```
+- **Financial**: MRR, burn rate, runway, cash efficiency
+- **Growth**: Revenue growth, customer acquisition
+- **Product**: API usage, active workspaces, evaluation runs
+- **Strategic**: Unit economics, cohort analysis, market position
+
+## 💡 Perfect For
+
+- **Early-stage startups** needing strategic guidance
+- **Founders** preparing investor updates
+- **Teams** tracking key business metrics
+- **Investors** monitoring portfolio companies
+
+Get started with `bun run ai-chief-agents.ts` for immediate strategic insights!

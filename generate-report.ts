@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import 'dotenv/config';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { MercuryClient } from './src/services/mercuryClient';

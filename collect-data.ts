@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import 'dotenv/config';
+
 /**
  * Background data collection script
  * Usage: 

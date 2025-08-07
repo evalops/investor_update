@@ -476,7 +476,6 @@ ${runway.recommendations.slice(0, 5).map((rec, index) =>
   }
 
   private calculateSurvivalProbability(): number {
-    const healthScore = this.calculateCompanyHealthScore(null as any);
     const runway = this.metrics.runwayMonths;
     const growth = this.metrics.monthlyGrowthRate;
 
@@ -489,8 +488,7 @@ ${runway.recommendations.slice(0, 5).map((rec, index) =>
     if (growth >= 0.15) {probability += 15;}
     else if (growth < 0.05) {probability -= 15;}
 
-    if (healthScore >= 80) {probability += 10;}
-    else if (healthScore < 40) {probability -= 10;}
+    // Health score component would be added here if available
 
     return Math.max(10, Math.min(95, probability));
   }
