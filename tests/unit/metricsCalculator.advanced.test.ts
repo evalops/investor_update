@@ -13,46 +13,46 @@ describe('MetricsCalculator - Advanced Tests', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle zero transactions', async () => {
+    it('should handle zero transactions', () => {
       calculator = new MetricsCalculator([]);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.totalRevenue).toBe(0);
-      expect(result.metrics.totalExpenses).toBe(0);
-      expect(result.metrics.averageMonthlyBurn).toBe(0);
-      expect(result.metrics.runwayMonths).toBe(Infinity);
+      expect(metrics.totalRevenue).toBe(0);
+      expect(metrics.totalExpenses).toBe(0);
+      expect(metrics.averageMonthlyBurn).toBe(0);
+      expect(metrics.runwayMonths).toBe(Infinity);
     });
 
-    it('should handle only income transactions', async () => {
+    it('should handle only income transactions', () => {
       transactions = [
         createTransaction('txn_1', 5000, 'Customer A', subMonths(now, 1)),
         createTransaction('txn_2', 3000, 'Customer B', subMonths(now, 0))
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.totalRevenue).toBe(8000);
-      expect(result.metrics.totalExpenses).toBe(0);
-      expect(result.metrics.averageMonthlyBurn).toBe(0);
-      expect(result.metrics.runwayMonths).toBe(Infinity);
+      expect(metrics.totalRevenue).toBe(8000);
+      expect(metrics.totalExpenses).toBe(0);
+      expect(metrics.averageMonthlyBurn).toBe(0);
+      expect(metrics.runwayMonths).toBe(Infinity);
     });
 
-    it('should handle only expense transactions', async () => {
+    it('should handle only expense transactions', () => {
       transactions = [
         createTransaction('txn_1', -2000, 'Vendor A', subMonths(now, 1)),
         createTransaction('txn_2', -3000, 'Vendor B', subMonths(now, 0))
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.totalRevenue).toBe(0);
-      expect(result.metrics.totalExpenses).toBe(5000);
-      expect(result.metrics.averageMonthlyBurn).toBeGreaterThan(0);
+      expect(metrics.totalRevenue).toBe(0);
+      expect(metrics.totalExpenses).toBe(5000);
+      expect(metrics.averageMonthlyBurn).toBeGreaterThan(0);
     });
 
-    it('should handle large transaction volumes efficiently', async () => {
+    it('should handle large transaction volumes efficiently', () => {
       // Generate 10,000 transactions
       transactions = Array.from({ length: 10000 }, (_, i) => 
         createTransaction(
@@ -65,17 +65,17 @@ describe('MetricsCalculator - Advanced Tests', () => {
 
       calculator = new MetricsCalculator(transactions);
       const startTime = Date.now();
-      const result = await calculator.calculateMetrics(10000, 12);
+      const metrics = calculator.calculateMetrics(10000, 12);
       const endTime = Date.now();
 
       // Should process in under 1 second
       expect(endTime - startTime).toBeLessThan(1000);
-      expect(result.metrics.monthlyMetrics).toHaveLength(12);
+      expect(metrics.monthlyMetrics).toHaveLength(12);
     });
   });
 
   describe('MRR Calculation', () => {
-    it('should identify recurring revenue correctly', async () => {
+    it('should identify recurring revenue correctly', () => {
       // Create recurring subscription pattern
       const customer = 'SaaS Customer';
       transactions = [
@@ -86,13 +86,13 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.mrr).toBe(1000);
-      expect(result.metrics.arr).toBe(12000);
+      expect(metrics.mrr).toBe(1000);
+      expect(metrics.arr).toBe(12000);
     });
 
-    it('should handle multiple recurring customers', async () => {
+    it('should handle multiple recurring customers', () => {
       transactions = [
         // Customer A - $500/month
         createTransaction('txn_1', 500, 'Customer A', subMonths(now, 2)),
@@ -107,13 +107,13 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.mrr).toBe(2000); // 500 + 1500
-      expect(result.metrics.customersCount).toBe(2); // Only recurring customers
+      expect(metrics.mrr).toBe(2000); // 500 + 1500
+      expect(metrics.customersCount).toBe(2); // Only recurring customers
     });
 
-    it('should detect churned customers', async () => {
+    it('should detect churned customers', () => {
       transactions = [
         // Customer A - Active
         createTransaction('txn_1', 1000, 'Customer A', subMonths(now, 1)),
@@ -124,15 +124,15 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 6);
+      const metrics = calculator.calculateMetrics(10000, 6);
 
-      expect(result.metrics.mrr).toBe(1000); // Only Customer A
-      expect(result.metrics.customersCount).toBe(1);
+      expect(metrics.mrr).toBe(1000); // Only Customer A
+      expect(metrics.customersCount).toBe(1);
     });
   });
 
   describe('Growth Metrics', () => {
-    it('should calculate month-over-month growth correctly', async () => {
+    it('should calculate month-over-month growth correctly', () => {
       transactions = [
         // Month 1: $1000 revenue
         createTransaction('txn_1', 1000, 'Customer A', subMonths(now, 2)),
@@ -143,12 +143,12 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 3);
+      const metrics = calculator.calculateMetrics(10000, 3);
 
-      expect(result.metrics.monthOverMonthGrowth).toBeCloseTo(50, 0);
+      expect(metrics.monthOverMonthGrowth).toBeCloseTo(50, 0);
     });
 
-    it('should handle negative growth', async () => {
+    it('should handle negative growth', () => {
       transactions = [
         createTransaction('txn_1', 2000, 'Customer A', subMonths(now, 2)),
         createTransaction('txn_2', 1500, 'Customer B', subMonths(now, 1)),
@@ -156,14 +156,14 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 3);
+      const metrics = calculator.calculateMetrics(10000, 3);
 
-      expect(result.metrics.monthOverMonthGrowth).toBeLessThan(0);
+      expect(metrics.monthOverMonthGrowth).toBeLessThan(0);
     });
   });
 
   describe('Burn Rate and Runway', () => {
-    it('should calculate runway with current burn rate', async () => {
+    it('should calculate runway with current burn rate', () => {
       transactions = [
         // Consistent $5000/month expenses
         createTransaction('txn_1', -5000, 'Expenses', subMonths(now, 2)),
@@ -176,15 +176,15 @@ describe('MetricsCalculator - Advanced Tests', () => {
 
       calculator = new MetricsCalculator(transactions);
       const balance = 20000;
-      const result = await calculator.calculateMetrics(balance, 3);
+      const metrics = calculator.calculateMetrics(balance, 3);
 
       // Net burn = $5000 - $1000 = $4000/month
       // Runway = $20000 / $4000 = 5 months
-      expect(result.metrics.averageMonthlyBurn).toBeCloseTo(4000, -2);
-      expect(result.metrics.runwayMonths).toBeCloseTo(5, 0);
+      expect(metrics.averageMonthlyBurn).toBeCloseTo(4000, -2);
+      expect(metrics.runwayMonths).toBeCloseTo(5, 0);
     });
 
-    it('should handle variable burn rates', async () => {
+    it('should handle variable burn rates', () => {
       transactions = [
         createTransaction('txn_1', -3000, 'Expenses', subMonths(now, 2)),
         createTransaction('txn_2', -5000, 'Expenses', subMonths(now, 1)),
@@ -192,16 +192,16 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(30000, 3);
+      const metrics = calculator.calculateMetrics(30000, 3);
 
       // Average burn = (3000 + 5000 + 7000) / 3 = 5000
-      expect(result.metrics.averageMonthlyBurn).toBeCloseTo(5000, -2);
-      expect(result.metrics.runwayMonths).toBeCloseTo(6, 0);
+      expect(metrics.averageMonthlyBurn).toBeCloseTo(5000, -2);
+      expect(metrics.runwayMonths).toBeCloseTo(6, 0);
     });
   });
 
   describe('Category Analysis', () => {
-    it('should categorize expenses correctly', async () => {
+    it('should categorize expenses correctly', () => {
       transactions = [
         createTransaction('txn_1', -5000, 'Google Cloud Platform', now, 'Cloud Services'),
         createTransaction('txn_2', -3000, 'AWS', now, 'Cloud Services'),
@@ -210,9 +210,9 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(10000, 1);
+      const metrics = calculator.calculateMetrics(10000, 1);
 
-      const lastMonth = result.metrics.monthlyMetrics[0];
+      const lastMonth = metrics.monthlyMetrics[0];
       expect(lastMonth.topExpenseCategories).toBeDefined();
       
       const categories = lastMonth.topExpenseCategories;
@@ -226,7 +226,7 @@ describe('MetricsCalculator - Advanced Tests', () => {
   });
 
   describe('YC Growth Score', () => {
-    it('should calculate high score for strong growth', async () => {
+    it('should calculate high score for strong growth', () => {
       // 20% week-over-week growth pattern
       const weeks = 4;
       transactions = [];
@@ -237,13 +237,13 @@ describe('MetricsCalculator - Advanced Tests', () => {
       }
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(50000, 1);
+      const metrics = calculator.calculateMetrics(50000, 1);
 
-      expect(result.metrics.ycGrowthScore).toBeGreaterThanOrEqual(8);
-      expect(result.metrics.weeklyGrowthRate).toBeGreaterThan(0.15);
+      expect(metrics.ycGrowthScore).toBeGreaterThanOrEqual(8);
+      expect(metrics.weeklyGrowthRate).toBeGreaterThan(0.15);
     });
 
-    it('should calculate low score for declining metrics', async () => {
+    it('should calculate low score for declining metrics', () => {
       transactions = [
         createTransaction('txn_1', 5000, 'Customer A', subMonths(now, 2)),
         createTransaction('txn_2', 3000, 'Customer B', subMonths(now, 1)),
@@ -253,9 +253,9 @@ describe('MetricsCalculator - Advanced Tests', () => {
       ];
 
       calculator = new MetricsCalculator(transactions);
-      const result = await calculator.calculateMetrics(15000, 3);
+      const metrics = calculator.calculateMetrics(15000, 3);
 
-      expect(result.metrics.ycGrowthScore).toBeLessThanOrEqual(5);
+      expect(metrics.ycGrowthScore).toBeLessThanOrEqual(5);
     });
   });
 });
