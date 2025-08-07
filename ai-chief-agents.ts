@@ -6,6 +6,20 @@ import { z } from 'zod';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { format } from 'date-fns';
+import yaml from 'js-yaml';
+import { MercuryClient } from './src/services/mercuryClient';
+import { MetricsCalculator } from './src/services/metricsCalculator';
+
+// Load business context
+async function loadBusinessContext() {
+  try {
+    const contextFile = await fs.readFile('./business-context.yaml', 'utf8');
+    return yaml.load(contextFile) as any;
+  } catch (error) {
+    console.log('No business-context.yaml found, using defaults');
+    return null;
+  }
+}
 
 // Tools for agents to use
 const getFinancialDataTool = tool({
@@ -15,15 +29,65 @@ const getFinancialDataTool = tool({
     period: z.string().describe('Time period for analysis (e.g., "30 days", "3 months")')
   }),
   execute: async (input) => {
-    // In real implementation, this would fetch from your existing data collectors
-    return {
-      currentBalance: 90,
-      weeksSinceFounding: 1,
-      monthlyRevenue: 0,
-      monthlyExpenses: 0,
-      transactionCount: 3,
-      stage: 'pre-revenue',
-      lastTransaction: '2025-08-07'
+    try {
+      const mercury = new MercuryClient();
+      const accounts = await mercury.getAccounts();
+      const primaryAccount = accounts[0]; // Get first account
+      
+      // Get recent transactions for analysis
+      const periodDays = input.period.includes('30') ? 30 : input.period.includes('90') ? 90 : 30;
+      const endDate = new Date();
+      const startDate = new Date(endDate.getTime() - periodDays * 24 * 60 * 60 * 1000);
+      const transactions = await mercury.getAllTransactions(primaryAccount.id, {
+        start: startDate.toISOString(),
+        end: endDate.toISOString()
+      });
+      
+      // Calculate basic metrics
+      const calculator = new MetricsCalculator(transactions);
+      const metrics = await calculator.calculateEvalOpsMetrics(primaryAccount.currentBalance, 3);
+      
+      return {
+        currentBalance: primaryAccount.currentBalance,
+        availableBalance: primaryAccount.availableBalance,
+        accountName: primaryAccount.name,
+        weeksSinceFounding: 1, // Could calculate from business context
+        monthlyRevenue: metrics.metrics.averageMonthlyRevenue,
+        monthlyExpenses: Math.abs(metrics.metrics.averageMonthlyBurn),
+        transactionCount: transactions.length,
+        stage: metrics.metrics.averageMonthlyRevenue > 0 ? 'early-revenue' : 'pre-revenue',
+        lastTransaction: transactions[0]?.postedDate || 'No recent transactions',
+        runway: metrics.metrics.runwayMonths,
+        burnRate: metrics.metrics.averageMonthlyBurn
+      };
+    } catch (error) {
+      console.log('Failed to get real financial data, using fallback:', error);
+      // Fallback to basic data if API fails
+      return {
+        currentBalance: 90,
+        weeksSinceFounding: 1,
+        monthlyRevenue: 0,
+        monthlyExpenses: 0,
+        transactionCount: 3,
+        stage: 'pre-revenue',
+        lastTransaction: '2025-08-07',
+        runway: 0,
+        burnRate: 0
+      };
+    }
+  }
+});
+
+const getBusinessContextTool = tool({
+  name: 'get_business_context',
+  description: 'Get business context including company stage, product, market, and goals',
+  parameters: z.object({}),
+  execute: async () => {
+    const context = await loadBusinessContext();
+    return context || {
+      company: { name: 'Startup', stage: 'early' },
+      product: { category: 'Unknown' },
+      market: { target_customers: [] }
     };
   }
 });
@@ -34,27 +98,46 @@ const analyzeStartupStageTool = tool({
   parameters: z.object({
     balance: z.number(),
     weeksSinceFounding: z.number(),
-    monthlyRevenue: z.number()
+    monthlyRevenue: z.number(),
+    runway: z.number().nullable(),
+    burnRate: z.number().nullable()
   }),
   execute: async (input) => {
-    const { balance, weeksSinceFounding, monthlyRevenue } = input;
+    const { balance, weeksSinceFounding, monthlyRevenue, runway, burnRate } = input;
+    const runwayValue = runway || 0;
+    const burnRateValue = burnRate || 0;
     
-    if (monthlyRevenue === 0 && weeksSinceFounding <= 8) {
+    // Determine stage based on revenue and runway
+    if (monthlyRevenue === 0) {
       return {
         stage: 'pre-revenue-bootstrap',
-        urgency: balance < 1000 ? 'critical' : balance < 5000 ? 'high' : 'medium',
-        timeToRevenue: balance < 1000 ? '2 weeks' : balance < 5000 ? '1 month' : '2-3 months',
-        focusAreas: ['customer-discovery', 'problem-validation', 'mvp-definition'],
-        riskLevel: balance < 500 ? 'extreme' : balance < 2000 ? 'high' : 'moderate'
+        urgency: balance < 1000 ? 'critical' : balance < 5000 ? 'high' : balance < 20000 ? 'medium' : 'low',
+        timeToRevenue: balance < 1000 ? '2 weeks' : balance < 5000 ? '1 month' : balance < 20000 ? '2-3 months' : '3-6 months',
+        focusAreas: ['customer-discovery', 'problem-validation', 'mvp-definition', 'first-revenue'],
+        riskLevel: balance < 500 ? 'extreme' : balance < 2000 ? 'high' : balance < 10000 ? 'moderate' : 'low',
+        runway: runwayValue > 0 ? `${runwayValue.toFixed(1)} months` : 'Very limited',
+        monthlyBurn: Math.abs(burnRateValue)
+      };
+    } else if (monthlyRevenue > 0 && monthlyRevenue < 10000) {
+      return {
+        stage: 'early-revenue',
+        urgency: runwayValue < 6 ? 'high' : runwayValue < 12 ? 'medium' : 'low',
+        timeToRevenue: 'Focus on scaling revenue',
+        focusAreas: ['product-market-fit', 'customer-acquisition', 'unit-economics'],
+        riskLevel: runwayValue < 3 ? 'high' : runwayValue < 6 ? 'moderate' : 'low',
+        runway: `${runwayValue.toFixed(1)} months`,
+        monthlyBurn: Math.abs(burnRateValue)
       };
     }
     
     return {
-      stage: 'unknown',
+      stage: 'scaling',
       urgency: 'medium',
-      timeToRevenue: 'unknown',
-      focusAreas: ['assess-current-state'],
-      riskLevel: 'unknown'
+      timeToRevenue: 'Focus on growth efficiency',
+      focusAreas: ['scaling', 'team-building', 'market-expansion'],
+      riskLevel: 'low',
+      runway: `${runwayValue.toFixed(1)} months`,
+      monthlyBurn: Math.abs(burnRateValue)
     };
   }
 });
@@ -116,7 +199,7 @@ const financialAnalystAgent = new Agent({
   - Flag urgent financial issues
   
   Focus on practical, actionable insights for founders with limited resources.`,
-  tools: [getFinancialDataTool, analyzeStartupStageTool]
+  tools: [getFinancialDataTool, analyzeStartupStageTool, getBusinessContextTool]
 });
 
 const strategyAdvisorAgent = new Agent({
@@ -125,26 +208,29 @@ const strategyAdvisorAgent = new Agent({
   
   Your role is to:
   - Analyze company stage and priorities
-  - Create actionable strategic recommendations
+  - Create actionable strategic recommendations  
   - Provide specific next steps and timelines
   - Focus on getting to first revenue quickly
+  - Consider the company's specific product, market, and competitive context
   
-  Always provide concrete, specific actions rather than generic advice.`,
-  tools: [generateActionPlanTool],
+  Always provide concrete, specific actions rather than generic advice. Use business context to make recommendations highly relevant.`,
+  tools: [generateActionPlanTool, getBusinessContextTool],
   handoffDescription: 'Expert in startup strategy, prioritization, and action planning'
 });
 
 const customerDevelopmentAgent = new Agent({
-  name: 'Customer Development Expert',
+  name: 'Customer Development Expert', 
   instructions: `You are a customer development expert who helps startups find product-market fit.
   
   Your role is to:
-  - Guide customer discovery processes
-  - Help validate problems and solutions
-  - Provide specific interview techniques
+  - Guide customer discovery processes specific to the company's target market
+  - Help validate problems and solutions with the right customer segments
+  - Provide specific interview techniques and outreach strategies
   - Focus on getting to paying customers fast
+  - Tailor advice to the company's product category and customer types
   
-  Always emphasize talking to customers before building anything.`,
+  Always emphasize talking to customers before building anything. Use business context to make customer development advice highly specific.`,
+  tools: [getBusinessContextTool],
   handoffDescription: 'Expert in customer discovery, validation, and early sales'
 });
 
@@ -154,20 +240,22 @@ const chiefOfStaffAgent = Agent.create({
   instructions: `You are an AI Chief of Staff for early-stage startups. Your job is to analyze the company's situation and coordinate with specialist agents to provide comprehensive advice.
 
   Process:
-  1. First, analyze the financial situation and startup stage
-  2. Hand off to Strategy Advisor for strategic recommendations
-  3. Hand off to Customer Development Expert for customer-focused advice
-  4. Synthesize all insights into a comprehensive report
+  1. Get business context to understand the company, product, and market
+  2. Analyze the financial situation and startup stage
+  3. Hand off to Strategy Advisor for strategic recommendations
+  4. Hand off to Customer Development Expert for customer-focused advice
+  5. Synthesize all insights into a comprehensive, context-aware report
 
   Always focus on:
   - Immediate priorities for survival and growth
-  - Specific, actionable recommendations
+  - Specific, actionable recommendations tailored to the business
   - Timeline-based action plans
   - Early warning signals
+  - Advice specific to the company's product category and target market
 
-  For pre-revenue startups, emphasize speed to first customer and revenue.`,
+  Use the business context to make all advice highly relevant and specific rather than generic startup advice.`,
   handoffs: [strategyAdvisorAgent, customerDevelopmentAgent],
-  tools: [getFinancialDataTool]
+  tools: [getFinancialDataTool, getBusinessContextTool]
 });
 
 async function runAIChiefOfStaff(): Promise<void> {
@@ -180,15 +268,17 @@ async function runAIChiefOfStaff(): Promise<void> {
 
     const result = await run(
       chiefOfStaffAgent,
-      `Analyze our startup situation and provide comprehensive guidance. We're a week-old company with $90 in the bank, no revenue yet, and need strategic advice on next steps.
+      `Analyze EvalOps's startup situation and provide comprehensive guidance. We're an early-stage AI evaluation platform and need strategic advice based on our current financial position.
 
       Please:
-      1. Assess our financial situation and startup stage
-      2. Provide strategic recommendations with specific actions
-      3. Give customer development guidance
-      4. Create a 4-week action plan with clear milestones
+      1. Get our current financial data from Mercury to understand our real cash position
+      2. Review our business context (company, product, market, customers)
+      3. Assess our financial situation and startup stage based on actual data
+      4. Provide strategic recommendations specific to AI/ML dev tools market
+      5. Give customer development guidance for Product Managers and AI Engineers
+      6. Create a 4-week action plan with clear milestones tailored to our financial reality
       
-      Focus on immediate priorities for survival and getting to first revenue.`
+      Focus on immediate priorities for survival and getting to first revenue in the AI evaluation space. Make recommendations specific to our product category, target customers, and actual financial constraints.`
     );
 
     console.log('📊 MULTI-AGENT ANALYSIS COMPLETE');

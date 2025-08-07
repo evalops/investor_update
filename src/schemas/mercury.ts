@@ -19,7 +19,7 @@ export const MercuryTransactionSchema = z.object({
   counterpartyName: z.string().nullable(),
   createdAt: z.string(), // ISO date string
   postedAt: z.string().nullable(),
-  status: z.enum(['pending', 'completed', 'failed']).optional(),
+  status: z.enum(['pending', 'completed', 'failed', 'sent']).optional(),
   kind: z.string(),
   note: z.string().nullable().optional(),
   bankDescription: z.string().nullable().optional(),

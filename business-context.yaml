@@ -1,0 +1,95 @@
+# EvalOps Business Context Configuration
+# This file helps the AI Chief of Staff provide more accurate guidance
+
+company:
+  name: "EvalOps"
+  website: "https://evalops.dev"
+  stage: "early-growth"  # Options: idea, pre-revenue, early-revenue, growth, scale
+  founded: "2024-03"  # March 2024 (estimated)
+  
+product:
+  name: "AI Evaluation & Testing Platform"
+  category: "Developer Tools / AI Infrastructure"
+  description: "Automated testing platform for AI applications that evaluates accuracy, latency, and cost to help teams ship AI features with confidence"
+  
+  # Primary value propositions
+  value_props:
+    - "Catch AI problems before customers see them"
+    - "Ship AI updates with confidence through automated testing" 
+    - "Bring predictability and rigor to AI development like traditional software"
+    
+  # Key metrics evaluated
+  metrics:
+    - "Accuracy: How well AI performs intended tasks"
+    - "Latency: Response time performance" 
+    - "Cost: Computational resource efficiency"
+
+market:
+  target_customers:
+    primary:
+      - role: "Product Managers"
+        pain: "Need to ensure AI features work reliably before launch"
+      - role: "AI/ML Engineers" 
+        pain: "Manual testing of AI models is time-consuming and unreliable"
+      - role: "Engineering Teams"
+        pain: "Lack of confidence when shipping AI-powered features"
+        
+  market_size: "AI/ML development tools market - rapidly growing with AI adoption"
+  competitors:
+    - "Arize AI (LLM observability)"
+    - "DeepEval (evaluation framework)"
+    - "Root Signals (GenAI measurement)"
+    - "Various internal testing solutions"
+
+team:
+  size: 2-5  # Estimated based on early stage
+  locations: ["Remote/Distributed"]
+  
+  # Key roles needed (if not filled)
+  hiring_priorities:
+    - "AI/ML Engineers"
+    - "Product Marketing" 
+    - "Sales/Business Development"
+    - "Customer Success"
+
+business_model:
+  type: "SaaS Platform"
+  pricing_strategy: "Usage-based + Seat-based" # Typical for dev tools
+  revenue_streams:
+    - "Platform subscriptions"
+    - "Evaluation runs/compute usage"
+    - "Enterprise features and support"
+
+current_focus:
+  # Based on stage and market
+  priorities:
+    - "Product-market fit validation"
+    - "Customer acquisition and retention"
+    - "Platform scalability and reliability"
+    - "Building developer community"
+    
+  challenges:
+    - "Market education (new category)"
+    - "Competition from larger platforms"
+    - "Technical complexity of AI evaluation"
+    - "Customer acquisition in crowded AI space"
+
+goals:
+  short_term: # Next 3-6 months
+    - "Validate product-market fit with key customer segments"
+    - "Build repeatable sales process"
+    - "Achieve $10K+ MRR"
+    - "Strong technical platform foundation"
+    
+  medium_term: # 6-18 months  
+    - "Scale to $100K+ ARR"
+    - "Expand team strategically" 
+    - "Consider fundraising for growth"
+    - "Establish market leadership in AI evaluation"
+
+# Financial context (for AI Chief of Staff calculations)
+financial:
+  stage: "pre-revenue" # Update as needed
+  runway_needs: "12-18 months" # Typical for this stage
+  funding_strategy: "Bootstrap -> Seed -> Series A path"
+  burn_targets: "Keep lean until strong PMF signals"
