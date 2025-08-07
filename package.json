@@ -10,10 +10,17 @@
   "scripts": {
     "generate": "bun run generate-report.ts",
     "dev": "bun run --watch generate-report.ts",
-    "build": "echo 'No build step needed with Bun'",
+    "build": "bun run tsc --noEmit",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "test:integration": "bun test tests/integration",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "health": "bun run src/services/healthCheck.ts",
+    "docker:build": "docker build -t investor-update .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.1",

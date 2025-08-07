@@ -10,6 +10,7 @@ import {
   type MercuryTransaction 
 } from '../schemas/mercury';
 import { Logger } from '../utils/logger';
+import { rateLimiter, retryHandler } from '../utils/rateLimiter';
 
 dotenv.config();
 
@@ -75,7 +76,9 @@ export class MercuryClient {
   }
 
   async getAccounts(): Promise<Account[]> {
-    try {
+    await rateLimiter.waitForLimit('mercury');
+    
+    return retryHandler.withRetry(async () => {
       const response = await this.client.get('/accounts');
       
       // Validate response data
@@ -86,14 +89,13 @@ export class MercuryClient {
       }
       
       return validated.data.accounts as Account[];
-    } catch (error) {
-      logger.error('Error fetching accounts:', error as Error);
-      throw error;
-    }
+    }, { maxRetries: 3 }, 'Mercury.getAccounts');
   }
 
   async getAccount(accountId: string): Promise<Account> {
-    try {
+    await rateLimiter.waitForLimit('mercury');
+    
+    return retryHandler.withRetry(async () => {
       const response = await this.client.get(`/account/${accountId}`);
       
       // Validate response data
@@ -104,10 +106,7 @@ export class MercuryClient {
       }
       
       return validated.data as Account;
-    } catch (error) {
-      logger.error(`Error fetching account ${accountId}:`, error as Error);
-      throw error;
-    }
+    }, { maxRetries: 3 }, `Mercury.getAccount(${accountId})`);
   }
 
   async getAccountBalance(accountId: string): Promise<AccountBalance> {
