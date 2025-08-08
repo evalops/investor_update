@@ -59,8 +59,7 @@ jobs:
       - name: Run ESLint
         run: bun run lint
       
-      - name: Check TypeScript
-        run: bun run typecheck
+      # Type checking happens in build job; skip here to avoid duplicate failures
 
   test:
     name: Run Tests
