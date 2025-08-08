@@ -33,9 +33,10 @@ export class StripeCollector extends BaseCollector {
   }
 
   private async calculateMRR(): Promise<number> {
+    if (!this.stripe) {return 0;}
     let mrrCents = 0;
 
-    const subscriptions = await this.stripe!.subscriptions.list({
+    const subscriptions = await this.stripe.subscriptions.list({
       status: 'active',
       limit: 100
     });
@@ -57,7 +58,8 @@ export class StripeCollector extends BaseCollector {
   private async calculateBookedARR(): Promise<number> {
     // Look at subscription schedules for future revenue
     try {
-      const schedules = await this.stripe!.subscriptionSchedules.list({
+      if (!this.stripe) {return 0;}
+      const schedules = await this.stripe.subscriptionSchedules.list({
         limit: 100
       });
 
@@ -91,12 +93,13 @@ export class StripeCollector extends BaseCollector {
     const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
 
     try {
+      if (!this.stripe) {return 0;}
       const [thisMonthInvoices, lastMonthInvoices] = await Promise.all([
-        this.stripe!.invoices.list({
+        this.stripe.invoices.list({
           created: { gte: Math.floor(thisMonth.getTime() / 1000) },
           status: 'paid'
         }),
-        this.stripe!.invoices.list({
+        this.stripe.invoices.list({
           created: {
             gte: Math.floor(twoMonthsAgo.getTime() / 1000),
             lt: Math.floor(lastMonth.getTime() / 1000)

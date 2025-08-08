@@ -55,9 +55,9 @@ export class BusinessContextBuilder {
 
     // Group transactions by customer
     this.transactions
-      .filter(t => t.amount > 0 && t.kind !== 'transfer' && t.counterpartyName)
+      .filter(t => t.amount > 0 && t.kind !== 'transfer' && !!t.counterpartyName)
       .forEach(transaction => {
-        const customerName = transaction.counterpartyName!;
+        const customerName = transaction.counterpartyName as string;
         
         if (!customerMap.has(customerName)) {
           customerMap.set(customerName, {
@@ -148,7 +148,11 @@ export class BusinessContextBuilder {
     return 'one-time';
   }
 
-  private assessChurnRisk(customer: any, daysSinceLast: number, frequency: string): 'low' | 'medium' | 'high' {
+  private assessChurnRisk(
+    customer: { transactions: Transaction[] },
+    daysSinceLast: number,
+    frequency: 'one-time' | 'monthly' | 'quarterly' | 'annual'
+  ): 'low' | 'medium' | 'high' {
     const expectedPaymentDays = {
       'monthly': 35,
       'quarterly': 100,
@@ -170,7 +174,7 @@ export class BusinessContextBuilder {
     return 'low';
   }
 
-  private assessExpansionPotential(customer: any): 'low' | 'medium' | 'high' {
+  private assessExpansionPotential(customer: { transactions: Transaction[] }): 'low' | 'medium' | 'high' {
     // Higher expansion potential for:
     // - Consistent payers
     // - Growing transaction amounts

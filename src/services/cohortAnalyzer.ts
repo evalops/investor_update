@@ -56,10 +56,10 @@ export class CohortAnalyzer {
 
     // Group transactions by counterparty to identify customers
     this.transactions.forEach(txn => {
-      if (!txn.counterpartyName || txn.amount <= 0) {return;}
+      if (!txn.counterpartyName || txn.amount <= 0 || !txn.postedDate) {return;}
 
       const customerKey = this.normalizeCustomerName(txn.counterpartyName);
-      const txnDate = parseISO(txn.postedDate!);
+      const txnDate = parseISO(txn.postedDate);
 
       if (!customerPatterns.has(customerKey)) {
         customerPatterns.set(customerKey, { amounts: [], dates: [], totalTxns: 0 });

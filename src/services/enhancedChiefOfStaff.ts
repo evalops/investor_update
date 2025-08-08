@@ -4,6 +4,7 @@ import { Logger } from '../utils/logger';
 
 import { BusinessContextBuilder } from './businessContextBuilder';
 import { BusinessIntelligenceAgents, type BusinessIntelligenceReport } from './businessIntelligenceAgents';
+import type { BusinessContext } from './businessIntelligenceAgents';
 import { ChiefOfStaffReportGenerator } from './chiefOfStaffReports';
 import type { Transaction } from './mercuryClient';
 import type { StartupMetrics } from './metricsCalculator';
@@ -67,7 +68,7 @@ export class EnhancedChiefOfStaffSystem {
     logger.info('Generating enhanced Chief of Staff report with AI agents');
 
     // Step 1: Generate baseline runway intelligence
-    console.log('🔍 Analyzing financial runway and scenarios...');
+    logger.info('🔍 Analyzing financial runway and scenarios...');
     const runwayEngine = new RunwayIntelligenceEngine(this.metrics);
     const runway = await runwayEngine.generateRunwayIntelligence();
 
@@ -76,12 +77,12 @@ export class EnhancedChiefOfStaffSystem {
     const baselineReport = await baselineChief.generateExecutiveReport();
 
     // Step 3: Build rich business context for AI agents
-    console.log('📊 Building comprehensive business context...');
+    logger.info('📊 Building comprehensive business context...');
     const contextBuilder = new BusinessContextBuilder(this.transactions, this.metrics, runway);
     const businessContext = await contextBuilder.buildBusinessContext();
 
     // Step 4: Run AI agent analysis
-    console.log('🤖 Running multi-agent business intelligence analysis...');
+    logger.info('🤖 Running multi-agent business intelligence analysis...');
     let aiIntelligence: BusinessIntelligenceReport;
     
     if (process.env.OPENAI_API_KEY) {
@@ -93,7 +94,7 @@ export class EnhancedChiefOfStaffSystem {
     }
 
     // Step 5: Synthesize insights combining runway analysis + AI intelligence
-    console.log('🧠 Synthesizing strategic insights...');
+    logger.info('🧠 Synthesizing strategic insights...');
     const executiveInsights = await this.synthesizeExecutiveInsights(
       runway, 
       baselineReport.summary, 
@@ -225,7 +226,7 @@ export class EnhancedChiefOfStaffSystem {
     return Math.floor((Date.now() - customer.lastTransaction.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  private generateMarketPosition(context: any): string {
+  private generateMarketPosition(context: BusinessContext): string {
     const growth = context.metrics.monthlyGrowthRate;
     const efficiency = context.metrics.cashEfficiency;
     
@@ -238,7 +239,7 @@ export class EnhancedChiefOfStaffSystem {
     }
   }
 
-  private assessMarketTiming(context: any): string {
+  private assessMarketTiming(context: BusinessContext): string {
     const runway = context.metrics.runwayMonths;
     const growth = context.metrics.monthlyGrowthRate;
     
@@ -276,7 +277,7 @@ export class EnhancedChiefOfStaffSystem {
     return investorMap[sector as keyof typeof investorMap] || investorMap['B2B SaaS'];
   }
 
-  private identifyFundraisingStrengths(context: any): string[] {
+  private identifyFundraisingStrengths(context: BusinessContext): string[] {
     const strengths: string[] = [];
     
     if (context.metrics.monthlyGrowthRate >= 0.10) {
@@ -295,7 +296,7 @@ export class EnhancedChiefOfStaffSystem {
     return strengths.length > 0 ? strengths : ['Established product with early traction'];
   }
 
-  private identifyFundraisingGaps(context: any): string[] {
+  private identifyFundraisingGaps(context: BusinessContext): string[] {
     const gaps: string[] = [];
     
     if (context.metrics.monthlyGrowthRate < 0.15) {
@@ -329,7 +330,7 @@ export class EnhancedChiefOfStaffSystem {
     }
   }
 
-  private assessInvestorReadiness(context: any): string {
+  private assessInvestorReadiness(context: BusinessContext): string {
     const growth = context.metrics.monthlyGrowthRate;
     const customers = context.customerTransactions.length;
     
@@ -342,7 +343,7 @@ export class EnhancedChiefOfStaffSystem {
     return "need improvement";
   }
 
-  private generatePrioritizedActions(context: any, customerConcentration: number) {
+  private generatePrioritizedActions(context: BusinessContext, customerConcentration: number) {
     const actions = [];
     
     if (customerConcentration > 40) {
@@ -378,7 +379,7 @@ export class EnhancedChiefOfStaffSystem {
     return actions;
   }
 
-  private prioritizeFeatures(context: any) {
+  private prioritizeFeatures(context: BusinessContext) {
     const features = [];
     
     if ((context.customerTransactions[0]?.revenue / context.metrics.totalRevenue) > 0.3) {

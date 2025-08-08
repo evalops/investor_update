@@ -6,8 +6,8 @@ import type { StartupMetrics } from './metricsCalculator';
 import type { RunwayPrediction } from './runwayIntelligence';
 
 // Local type aliases to avoid importing CrewAI types during type-checking
-type AgentType = any;
-type TaskType = any;
+type AgentType = unknown;
+type TaskType = unknown;
 
 const logger = Logger.for('BusinessIntelligence');
 
