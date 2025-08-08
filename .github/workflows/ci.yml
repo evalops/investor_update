@@ -51,8 +51,10 @@ jobs:
             libpixman-1-dev \
             pkg-config
 
-      - name: Install dependencies (no scripts)
-        run: npm ci --ignore-scripts
+      - name: Install dependencies (omit optional, no scripts)
+        run: npm ci --omit=optional --ignore-scripts
+        env:
+          CI: true
       
       - name: Run ESLint
         run: bun run lint
@@ -91,8 +93,10 @@ jobs:
             libpixman-1-dev \
             pkg-config
 
-      - name: Install dependencies (no scripts)
-        run: npm ci --ignore-scripts
+      - name: Install dependencies (omit optional, no scripts)
+        run: npm ci --omit=optional --ignore-scripts
+        env:
+          CI: true
       
       - name: Run tests with coverage
         run: bun test --coverage
@@ -176,8 +180,10 @@ jobs:
             libpixman-1-dev \
             pkg-config
 
-      - name: Install dependencies (no scripts)
-        run: npm ci --ignore-scripts
+      - name: Install dependencies (omit optional, no scripts)
+        run: npm ci --omit=optional --ignore-scripts
+        env:
+          CI: true
       
       - name: Build application
         run: bun run build
@@ -233,8 +239,10 @@ jobs:
             libpixman-1-dev \
             pkg-config
 
-      - name: Install dependencies (no scripts)
-        run: npm ci --ignore-scripts
+      - name: Install dependencies (omit optional, no scripts)
+        run: npm ci --omit=optional --ignore-scripts
+        env:
+          CI: true
       
       - name: Run integration tests
         run: bun test tests/integration
