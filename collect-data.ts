@@ -141,7 +141,7 @@ Options:
     }
 
   } catch (error) {
-    logger.error('Data collection failed', { error });
+    logger.error('Data collection failed', error as Error);
     console.log(`\n💥 Data collection failed: ${error}`);
     process.exit(1);
   }

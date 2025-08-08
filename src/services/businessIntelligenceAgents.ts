@@ -1,8 +1,13 @@
-import { Agent, Task, Crew } from 'crewai';
 import OpenAI from 'openai';
-import { StartupMetrics } from './metricsCalculator';
-import { RunwayPrediction } from './runwayIntelligence';
+
 import { Logger } from '../utils/logger';
+
+import type { StartupMetrics } from './metricsCalculator';
+import type { RunwayPrediction } from './runwayIntelligence';
+
+// Local type aliases to avoid importing CrewAI types during type-checking
+type AgentType = any;
+type TaskType = any;
 
 const logger = Logger.for('BusinessIntelligence');
 
@@ -102,17 +107,20 @@ export class BusinessIntelligenceAgents {
   async generateBusinessIntelligence(): Promise<BusinessIntelligenceReport> {
     logger.info('Starting multi-agent business intelligence analysis');
 
+    // Load CrewAI at runtime to avoid type-checking its TS sources
+    const { Agent, Task, Crew } = await import('crewai');
+
     // Create specialized agents
-    const customerAgent = this.createCustomerIntelligenceAgent();
-    const marketAgent = this.createMarketIntelligenceAgent();
-    const investorAgent = this.createInvestorIntelligenceAgent();
-    const executionAgent = this.createExecutionStrategyAgent();
+    const customerAgent = this.createCustomerIntelligenceAgent(Agent);
+    const marketAgent = this.createMarketIntelligenceAgent(Agent);
+    const investorAgent = this.createInvestorIntelligenceAgent(Agent);
+    const executionAgent = this.createExecutionStrategyAgent(Agent);
 
     // Create tasks for each agent
-    const customerTask = this.createCustomerAnalysisTask();
-    const marketTask = this.createMarketAnalysisTask();
-    const investorTask = this.createInvestorAnalysisTask();
-    const executionTask = this.createExecutionStrategyTask();
+    const customerTask = this.createCustomerAnalysisTask(Task);
+    const marketTask = this.createMarketAnalysisTask(Task);
+    const investorTask = this.createInvestorAnalysisTask(Task);
+    const executionTask = this.createExecutionStrategyTask(Task);
 
     // Create crew and run analysis
     const crew = new Crew({
@@ -126,10 +134,10 @@ export class BusinessIntelligenceAgents {
     return this.parseResults(results);
   }
 
-  private createCustomerIntelligenceAgent(): Agent {
+  private createCustomerIntelligenceAgent(AgentCtor: any): AgentType {
     const customerData = this.formatCustomerData();
     
-    return new Agent({
+    return new AgentCtor({
       role: 'Customer Intelligence Analyst',
       goal: 'Provide deep customer insights including churn risk, expansion opportunities, and revenue concentration analysis',
       backstory: `You are a senior customer success analyst with 10+ years experience at high-growth SaaS companies. 
@@ -142,10 +150,10 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createMarketIntelligenceAgent(): Agent {
+  private createMarketIntelligenceAgent(AgentCtor: any): AgentType {
     const marketData = this.formatMarketData();
     
-    return new Agent({
+    return new AgentCtor({
       role: 'Market Intelligence Analyst',
       goal: 'Analyze competitive landscape, industry benchmarks, and market timing for strategic positioning',
       backstory: `You are a senior market research analyst with expertise in startup ecosystems and competitive intelligence. 
@@ -158,10 +166,10 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createInvestorIntelligenceAgent(): Agent {
+  private createInvestorIntelligenceAgent(AgentCtor: any): AgentType {
     const financialData = this.formatFinancialData();
     
-    return new Agent({
+    return new AgentCtor({
       role: 'Investor Intelligence Analyst',
       goal: 'Assess fundraising readiness, analyze funding landscape, and provide investor strategy recommendations',
       backstory: `You are a former venture capitalist turned advisor with 12+ years in startup financing. 
@@ -174,10 +182,10 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createExecutionStrategyAgent(): Agent {
+  private createExecutionStrategyAgent(AgentCtor: any): AgentType {
     const executionData = this.formatExecutionData();
     
-    return new Agent({
+    return new AgentCtor({
       role: 'Execution Strategy Advisor',
       goal: 'Provide specific, actionable recommendations for product, growth, and operational priorities',
       backstory: `You are a former startup CEO and operator with 15+ years building and scaling companies. 
@@ -190,8 +198,8 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createCustomerAnalysisTask(): Task {
-    return new Task({
+  private createCustomerAnalysisTask(TaskCtor: any): TaskType {
+    return new TaskCtor({
       description: `Analyze customer data and provide intelligence on:
         1. Customer health and churn risk assessment
         2. Revenue concentration analysis (which customers represent what % of revenue)
@@ -209,8 +217,8 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createMarketAnalysisTask(): Task {
-    return new Task({
+  private createMarketAnalysisTask(TaskCtor: any): TaskType {
+    return new TaskCtor({
       description: `Analyze market positioning and competitive landscape:
         1. Assess competitive position based on growth metrics and market stage
         2. Benchmark performance against industry standards
@@ -228,8 +236,8 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createInvestorAnalysisTask(): Task {
-    return new Task({
+  private createInvestorAnalysisTask(TaskCtor: any): TaskType {
+    return new TaskCtor({
       description: `Assess fundraising readiness and investor strategy:
         1. Evaluate current metrics against investor expectations
         2. Assess funding landscape and market sentiment
@@ -247,8 +255,8 @@ export class BusinessIntelligenceAgents {
     });
   }
 
-  private createExecutionStrategyTask(): Task {
-    return new Task({
+  private createExecutionStrategyTask(TaskCtor: any): TaskType {
+    return new TaskCtor({
       description: `Provide specific execution strategy and prioritization:
         1. Analyze resource allocation and identify highest-impact activities
         2. Prioritize product features and growth initiatives
@@ -373,7 +381,7 @@ export class BusinessIntelligenceAgents {
     - Revenue per Employee: $${(metrics.totalRevenue / team.size).toFixed(0)}`;
   }
 
-  private async parseResults(results: any): Promise<BusinessIntelligenceReport> {
+  private async parseResults(_results: any): Promise<BusinessIntelligenceReport> {
     // In a real implementation, we'd parse the structured output from each agent
     // For now, we'll create a mock response that demonstrates the concept
     logger.info('Parsing multi-agent analysis results');

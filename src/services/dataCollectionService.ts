@@ -6,6 +6,8 @@ import { logger } from '../utils/logger';
 
 import { MercuryClient } from './mercuryClient';
 
+type CachedResult = { data: any; timestamp: string };
+
 export interface DataCollectionResult {
   source: string;
   status: 'success' | 'error' | 'stale';
@@ -30,6 +32,8 @@ export class DataCollectionService {
   private cache: DataCache;
   private collectors: Map<string, () => Promise<any>>;
   private isRunning: boolean = false;
+  private static readonly CACHE_TTL_MINUTES = 120;
+  private static readonly CACHE_KEY_PREFIX = 'data-';
 
   constructor() {
     this.cache = new DataCache('./.data-cache');
@@ -113,11 +117,11 @@ export class DataCollectionService {
       // Collect from all sources in parallel
       const promises = Array.from(this.collectors.entries()).map(async ([source, collector]) => {
         const startTime = Date.now();
-        const cacheKey = `data-${source}`;
+        const cacheKey = `${DataCollectionService.CACHE_KEY_PREFIX}${source}`;
 
         try {
           // Check if we have fresh cached data first
-          const cached = await this.cache.get(cacheKey);
+          const cached = await this.cache.get<CachedResult>(cacheKey);
           if (cached && this.isFresh(cached.timestamp, maxAgeMinutes)) {
             const age = this.getDataAge(new Date(cached.timestamp));
             logger.debug(`Using cached ${source} data`, { age });
@@ -135,7 +139,7 @@ export class DataCollectionService {
           // Fetch fresh data with timeout
           const data = await Promise.race([
             collector(),
-            new Promise((_, reject) => 
+            new Promise((_resolve, reject) =>
               setTimeout(() => reject(new Error('Timeout after 60s')), 60000)
             )
           ]);
@@ -144,7 +148,7 @@ export class DataCollectionService {
           const timestamp = new Date();
 
           // Cache the result
-          await this.cache.set(cacheKey, { data, timestamp: timestamp.toISOString() }, 120); // 2 hour TTL
+          await this.cache.set(cacheKey, { data, timestamp: timestamp.toISOString() }, DataCollectionService.CACHE_TTL_MINUTES);
 
           logger.info(`✅ Collected ${source} data`, { responseTime, dataSize: JSON.stringify(data).length });
 
@@ -162,7 +166,7 @@ export class DataCollectionService {
           logger.warn(`❌ Failed to collect ${source} data`, { error: error.message, responseTime });
 
           // Try to use stale cached data as fallback
-          const staleData = await this.cache.get(cacheKey);
+          const staleData = await this.cache.get<CachedResult>(cacheKey);
           if (staleData) {
             const age = this.getDataAge(new Date(staleData.timestamp));
             logger.info(`🕐 Using stale ${source} data as fallback`, { age });
@@ -212,7 +216,8 @@ export class DataCollectionService {
     const results: DataCollectionResult[] = [];
 
     for (const source of this.collectors.keys()) {
-      const cached = await this.cache.get(`data-${source}`);
+      type CachedResult = { data: any; timestamp: string };
+      const cached = await this.cache.get<CachedResult>(`${DataCollectionService.CACHE_KEY_PREFIX}${source}`);
       
       if (cached) {
         const age = this.getDataAge(new Date(cached.timestamp));

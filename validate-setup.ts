@@ -26,7 +26,7 @@ async function main() {
       process.exit(1);
     }
   } catch (error) {
-    logger.error('Validation failed with unexpected error', { error });
+    logger.error('Validation failed with unexpected error', error as Error);
     console.log('\n💥 Validation crashed! Check the logs above for details.\n');
     process.exit(1);
   }

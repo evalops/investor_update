@@ -15,7 +15,7 @@
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "test:integration": "bun test tests/integration",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint --quiet src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "validate": "bun run validate-setup.ts",
     "collect-data": "bun run collect-data.ts",

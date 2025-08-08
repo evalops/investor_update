@@ -62,7 +62,7 @@ export function validateEnvironment(): ValidationResult {
     if (!value || value.trim() === '') {
       if (config.required) {
         missing.push(config.name);
-        logger.error(`Missing required environment variable: ${config.name}`, {
+        logger.error(`Missing required environment variable: ${config.name}`, undefined, {
           description: config.description,
           example: config.example
         });
@@ -88,7 +88,7 @@ export function validateEnvironment(): ValidationResult {
       warnings: warnings.length
     });
   } else {
-    logger.error('Environment validation failed', {
+    logger.error('Environment validation failed', undefined, {
       missingRequired: missing,
       totalMissing: missing.length
     });

@@ -89,12 +89,12 @@ export class StartupValidator {
       // Quick test - just get accounts (lightweight call)
       const accounts = await Promise.race([
         client.getAccounts(),
-        new Promise<never>((_, reject) => 
+        new Promise<never>((_resolve, reject) => 
           setTimeout(() => reject(new Error('Timeout')), this.TIMEOUT_MS)
         )
       ]);
 
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
 
       if (!accounts || accounts.length === 0) {
         return {
@@ -113,7 +113,7 @@ export class StartupValidator {
       };
 
     } catch (error: any) {
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
       
       if (error.message?.includes('MERCURY_API_TOKEN')) {
         return {
@@ -159,12 +159,12 @@ export class StartupValidator {
       // Quick test - get basic data
       const result = await Promise.race([
         collector.collect(),
-        new Promise<never>((_, reject) => 
+        new Promise<never>((_resolve, reject) => 
           setTimeout(() => reject(new Error('Timeout')), this.TIMEOUT_MS)
         )
       ]);
 
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
 
       if (result.error) {
         return {
@@ -183,7 +183,7 @@ export class StartupValidator {
       };
 
     } catch (error: any) {
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
       
       return {
         service: 'Attio CRM API',
@@ -210,12 +210,12 @@ export class StartupValidator {
 
       const result = await Promise.race([
         collector.collect(),
-        new Promise<never>((_, reject) => 
+        new Promise<never>((_resolve, reject) => 
           setTimeout(() => reject(new Error('Timeout')), this.TIMEOUT_MS)
         )
       ]);
 
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
 
       if (result.error) {
         return {
@@ -234,7 +234,7 @@ export class StartupValidator {
       };
 
     } catch (error: any) {
-      const responseTime = Date.now() - startTime;
+      const responseTime = Math.max(1, Date.now() - startTime);
       
       return {
         service: 'PostHog Analytics API',

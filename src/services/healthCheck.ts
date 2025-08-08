@@ -101,7 +101,7 @@ export class HealthCheckService {
     
     try {
       const client = new MercuryClient();
-      const accounts = await client.getAccounts();
+      const _accounts = await client.getAccounts();
       
       const responseTime = Date.now() - start;
       this.recordApiCall('mercury', responseTime);
@@ -127,7 +127,7 @@ export class HealthCheckService {
    */
   private async checkCache(): Promise<HealthStatus['checks'][string]> {
     try {
-      const stats = await cacheManager.getStats();
+      const _stats = await cacheManager.getStats();
       
       // Test cache operations
       const testKey = 'health-check-test';

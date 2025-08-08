@@ -1,4 +1,4 @@
-import { format, parseISO, startOfMonth, addMonths, differenceInMonths } from 'date-fns';
+import { format, parseISO, startOfMonth, addMonths } from 'date-fns';
 
 import type { Transaction } from './mercuryClient';
 

@@ -104,7 +104,7 @@ export class ChartGenerator {
           await fs.writeFile(chartPath, chartBuffer);
           return chartPath;
         } catch (error) {
-          logger.error(`Failed to generate chart ${name}`, { chartName: name, error });
+          logger.error(`Failed to generate chart ${name}`, error as Error, { chartName: name });
           return null;
         }
       })

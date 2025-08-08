@@ -1,15 +1,12 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
-import { z } from 'zod';
 
 import { 
-  MercuryAccountSchema, 
-  MercuryTransactionSchema,
+  MercuryAccountSchema,
   MercuryAccountsResponseSchema,
   MercuryTransactionsResponseSchema,
-  type MercuryAccount,
-  type MercuryTransaction 
+  
 } from '../schemas/mercury';
 import { getRequiredEnvVar, getOptionalEnvVar } from '../utils/envValidator';
 import { Logger } from '../utils/logger';

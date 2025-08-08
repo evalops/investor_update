@@ -9,7 +9,6 @@ import {
   format,
   parseISO,
   isWithinInterval,
-  differenceInDays,
   differenceInCalendarDays,
   addDays,
   startOfWeek

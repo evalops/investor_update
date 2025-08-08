@@ -1,11 +1,13 @@
-import { ChiefOfStaffReportGenerator } from './chiefOfStaffReports';
-import { BusinessIntelligenceAgents, BusinessIntelligenceReport } from './businessIntelligenceAgents';
-import { BusinessContextBuilder } from './businessContextBuilder';
-import { StartupMetrics } from './metricsCalculator';
-import { RunwayIntelligenceEngine } from './runwayIntelligence';
-import { Transaction } from './mercuryClient';
-import { Logger } from '../utils/logger';
 import { format } from 'date-fns';
+
+import { Logger } from '../utils/logger';
+
+import { BusinessContextBuilder } from './businessContextBuilder';
+import { BusinessIntelligenceAgents, type BusinessIntelligenceReport } from './businessIntelligenceAgents';
+import { ChiefOfStaffReportGenerator } from './chiefOfStaffReports';
+import type { Transaction } from './mercuryClient';
+import type { StartupMetrics } from './metricsCalculator';
+import { RunwayIntelligenceEngine } from './runwayIntelligence';
 
 const logger = Logger.for('EnhancedChiefOfStaff');
 
@@ -217,7 +219,9 @@ export class EnhancedChiefOfStaffSystem {
   }
 
   private daysSinceLastTransaction(customer: any): number {
-    if (!customer?.lastTransaction) return 999;
+    if (!customer?.lastTransaction) {
+      return 999;
+    }
     return Math.floor((Date.now() - customer.lastTransaction.getTime()) / (1000 * 60 * 60 * 24));
   }
 
@@ -329,8 +333,12 @@ export class EnhancedChiefOfStaffSystem {
     const growth = context.metrics.monthlyGrowthRate;
     const customers = context.customerTransactions.length;
     
-    if (growth >= 0.15 && customers >= 20) return "align well";
-    if (growth >= 0.10 && customers >= 10) return "are competitive";
+    if (growth >= 0.15 && customers >= 20) {
+      return "align well";
+    }
+    if (growth >= 0.10 && customers >= 10) {
+      return "are competitive";
+    }
     return "need improvement";
   }
 
@@ -401,8 +409,12 @@ export class EnhancedChiefOfStaffSystem {
   private assessTeamSizing(context: any): string {
     const revenuePerEmployee = context.metrics.totalRevenue / context.teamInfo.size;
     
-    if (revenuePerEmployee > 50000) return "efficiently sized";
-    if (revenuePerEmployee > 20000) return "appropriately sized";
+    if (revenuePerEmployee > 50000) {
+      return "efficiently sized";
+    }
+    if (revenuePerEmployee > 20000) {
+      return "appropriately sized";
+    }
     return "potentially oversized for current revenue";
   }
 

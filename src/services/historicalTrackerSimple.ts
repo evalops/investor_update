@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { format, parseISO, startOfMonth, subMonths } from 'date-fns';
+import { format, startOfMonth, subMonths } from 'date-fns';
 
 import { logger } from '../utils/logger';
 
@@ -49,7 +49,7 @@ export class HistoricalTracker {
     try {
       await fs.mkdir(this.dataDir, { recursive: true });
     } catch (error) {
-      logger.error('Failed to create data directory', { error, dataDir: this.dataDir });
+      logger.error('Failed to create data directory', error as Error, { dataDir: this.dataDir });
       throw error;
     }
   }
@@ -86,7 +86,7 @@ export class HistoricalTracker {
       await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
       logger.info('Metrics snapshot saved', { month: snapshotMonth, recordedAt });
     } catch (error) {
-      logger.error('Failed to save snapshot', { error, month: snapshotMonth });
+      logger.error('Failed to save snapshot', error as Error, { month: snapshotMonth });
       throw error;
     }
   }
@@ -112,7 +112,7 @@ export class HistoricalTracker {
       if (error.code === 'ENOENT') {
         return null; // File doesn't exist
       }
-      logger.error('Failed to read snapshot', { error, month });
+      logger.error('Failed to read snapshot', error as Error, { month });
       throw error;
     }
   }

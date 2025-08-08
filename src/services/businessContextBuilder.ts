@@ -1,9 +1,11 @@
-import { Transaction } from './mercuryClient';
-import { StartupMetrics } from './metricsCalculator';
-import { RunwayPrediction } from './runwayIntelligence';
-import { BusinessContext } from './businessIntelligenceAgents';
-import { Logger } from '../utils/logger';
 import { parseISO, differenceInDays } from 'date-fns';
+
+import { Logger } from '../utils/logger';
+
+import type { BusinessContext } from './businessIntelligenceAgents';
+import type { Transaction } from './mercuryClient';
+import type { StartupMetrics } from './metricsCalculator';
+import type { RunwayPrediction } from './runwayIntelligence';
 
 const logger = Logger.for('BusinessContextBuilder');
 
@@ -72,13 +74,13 @@ export class BusinessContextBuilder {
         customer.totalRevenue += transaction.amount;
 
         const transactionDate = parseISO(transaction.postedDate || transaction.createdAt);
-        if (transactionDate < customer.firstTransaction) {
-          customer.firstTransaction = transactionDate;
-        }
-        if (transactionDate > customer.lastTransaction) {
-          customer.lastTransaction = transactionDate;
-        }
-      });
+    if (transactionDate < customer.firstTransaction) {
+      customer.firstTransaction = transactionDate;
+    }
+    if (transactionDate > customer.lastTransaction) {
+      customer.lastTransaction = transactionDate;
+    }
+  });
 
     // Analyze patterns and create customer intelligence
     const customerAnalysis = Array.from(customerMap.values()).map(customer => {
@@ -118,7 +120,9 @@ export class BusinessContextBuilder {
   }
 
   private determinePaymentFrequency(transactions: Transaction[]): 'one-time' | 'monthly' | 'quarterly' | 'annual' {
-    if (transactions.length <= 1) return 'one-time';
+    if (transactions.length <= 1) {
+      return 'one-time';
+    }
 
     // Calculate average days between transactions
     const dates = transactions
@@ -132,9 +136,15 @@ export class BusinessContextBuilder {
     
     const avgDaysBetween = totalDaysBetween / (dates.length - 1);
 
-    if (avgDaysBetween <= 35) return 'monthly';
-    if (avgDaysBetween <= 100) return 'quarterly';
-    if (avgDaysBetween <= 400) return 'annual';
+    if (avgDaysBetween <= 35) {
+      return 'monthly';
+    }
+    if (avgDaysBetween <= 100) {
+      return 'quarterly';
+    }
+    if (avgDaysBetween <= 400) {
+      return 'annual';
+    }
     return 'one-time';
   }
 
@@ -148,9 +158,15 @@ export class BusinessContextBuilder {
 
     const expected = expectedPaymentDays[frequency as keyof typeof expectedPaymentDays];
     
-    if (frequency === 'one-time') return 'low';
-    if (daysSinceLast > expected * 1.5) return 'high';
-    if (daysSinceLast > expected * 1.2) return 'medium';
+    if (frequency === 'one-time') {
+      return 'low';
+    }
+    if (daysSinceLast > expected * 1.5) {
+      return 'high';
+    }
+    if (daysSinceLast > expected * 1.2) {
+      return 'medium';
+    }
     return 'low';
   }
 
@@ -165,8 +181,12 @@ export class BusinessContextBuilder {
     const isGrowing = recentTransactions.length >= 2 && 
       recentTransactions[recentTransactions.length - 1].amount > recentTransactions[0].amount;
     
-    if (isConsistent && isGrowing) return 'high';
-    if (isConsistent || isGrowing) return 'medium';
+    if (isConsistent && isGrowing) {
+      return 'high';
+    }
+    if (isConsistent || isGrowing) {
+      return 'medium';
+    }
     return 'low';
   }
 
@@ -180,15 +200,23 @@ export class BusinessContextBuilder {
 
     // Infer stage based on revenue and metrics
     let stage: 'pre-seed' | 'seed' | 'series-a' | 'series-b+' = 'pre-seed';
-    if (revenue > 1000000) stage = 'series-b+';
-    else if (revenue > 100000) stage = 'series-a';
-    else if (revenue > 10000) stage = 'seed';
+    if (revenue > 1000000) {
+      stage = 'series-b+';
+    } else if (revenue > 100000) {
+      stage = 'series-a';
+    } else if (revenue > 10000) {
+      stage = 'seed';
+    }
 
     // Infer sector based on customer patterns and transaction amounts
     let sector = 'B2B SaaS'; // Default assumption
-    if (avgCustomerValue < 100) sector = 'Consumer/B2C';
-    else if (avgCustomerValue > 5000) sector = 'Enterprise B2B';
-    else if (avgCustomerValue > 1000) sector = 'Mid-market B2B';
+    if (avgCustomerValue < 100) {
+      sector = 'Consumer/B2C';
+    } else if (avgCustomerValue > 5000) {
+      sector = 'Enterprise B2B';
+    } else if (avgCustomerValue > 1000) {
+      sector = 'Mid-market B2B';
+    }
 
     // Estimate market size based on sector
     const marketSizes = {
@@ -244,7 +272,7 @@ export class BusinessContextBuilder {
     }
 
     // Infer roles based on stage and team size
-    const roles = this.inferTeamRoles(estimatedTeamSize, this.metrics.totalRevenue);
+    const roles = this.inferTeamRoles(estimatedTeamSize);
 
     // Identify recent hires from payroll increases
     const recentHires = this.identifyRecentHires();
@@ -257,7 +285,7 @@ export class BusinessContextBuilder {
     };
   }
 
-  private inferTeamRoles(teamSize: number, revenue: number): string[] {
+  private inferTeamRoles(teamSize: number): string[] {
     const baseRoles = ['CEO/Founder', 'CTO/Technical Co-founder'];
     
     if (teamSize <= 3) {
@@ -311,10 +339,18 @@ export class BusinessContextBuilder {
   }
 
   private inferRoleFromCost(monthlyCost: number): string {
-    if (monthlyCost >= 15000) return 'Senior Engineer/Executive';
-    if (monthlyCost >= 10000) return 'Senior Role/Manager';
-    if (monthlyCost >= 7000) return 'Mid-level Engineer/Specialist';
-    if (monthlyCost >= 4000) return 'Junior Role/Contractor';
+    if (monthlyCost >= 15000) {
+      return 'Senior Engineer/Executive';
+    }
+    if (monthlyCost >= 10000) {
+      return 'Senior Role/Manager';
+    }
+    if (monthlyCost >= 7000) {
+      return 'Mid-level Engineer/Specialist';
+    }
+    if (monthlyCost >= 4000) {
+      return 'Junior Role/Contractor';
+    }
     return 'Part-time/Intern';
   }
 

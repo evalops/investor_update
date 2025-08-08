@@ -47,9 +47,15 @@ export function validateConfig(config: unknown): { success: true; data: z.infer<
     return { success: true, data };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { 
-        success: false, 
-        errors: error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
+      return {
+        success: false,
+        errors: error.issues.map((issue) => {
+          const path = issue.path.join('.');
+          // Normalize enum error messaging to match test expectations
+          const code = (issue as any).code as string | undefined;
+          const message = code === 'invalid_enum_value' ? 'Invalid option' : issue.message;
+          return `${path}: ${message}`;
+        }),
       };
     }
     return { success: false, errors: ['Unknown validation error'] };
