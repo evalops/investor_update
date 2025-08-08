@@ -52,7 +52,7 @@ jobs:
             pkg-config
 
       - name: Install dependencies (omit optional, no scripts)
-        run: npm ci --omit=optional --ignore-scripts
+        run: npm install --no-audit --no-fund --omit=optional --ignore-scripts
         env:
           CI: true
       
@@ -94,7 +94,7 @@ jobs:
             pkg-config
 
       - name: Install dependencies (omit optional, no scripts)
-        run: npm ci --omit=optional --ignore-scripts
+        run: npm install --no-audit --no-fund --omit=optional --ignore-scripts
         env:
           CI: true
       
@@ -181,7 +181,7 @@ jobs:
             pkg-config
 
       - name: Install dependencies (omit optional, no scripts)
-        run: npm ci --omit=optional --ignore-scripts
+        run: npm install --no-audit --no-fund --omit=optional --ignore-scripts
         env:
           CI: true
       
@@ -240,7 +240,7 @@ jobs:
             pkg-config
 
       - name: Install dependencies (omit optional, no scripts)
-        run: npm ci --omit=optional --ignore-scripts
+        run: npm install --no-audit --no-fund --omit=optional --ignore-scripts
         env:
           CI: true
       
