@@ -636,7 +636,10 @@ export class ChartGenerator {
         if (!categoryTotals.has(category)) {
           categoryTotals.set(category, new Array(metrics.monthlyMetrics.length).fill(0));
         }
-        categoryTotals.get(category)![monthIndex] = amount;
+        const arr = categoryTotals.get(category);
+        if (arr) {
+          arr[monthIndex] = amount;
+        }
       });
     });
 
@@ -789,8 +792,8 @@ export class ChartGenerator {
   }
 
   async generateCustomChart(
-    data: { labels: string[]; datasets: any[] },
-    options: any,
+    data: { labels: string[]; datasets: Array<{ label: string; data: number[]; [key: string]: unknown }> },
+    options: Record<string, unknown>,
     type: 'bar' | 'line' | 'pie' | 'doughnut' = 'line'
   ): Promise<Buffer> {
     const configuration: ChartConfiguration = {
