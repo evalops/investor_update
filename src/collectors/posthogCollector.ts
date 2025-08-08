@@ -85,7 +85,7 @@ export class PostHogCollector extends BaseCollector {
     }
 
     try {
-      const headers = {
+      const headers: Record<string, string> = {
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       };
@@ -157,7 +157,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getDailyActiveUsers(headers: any): Promise<{ dau: number }> {
+  private async getDailyActiveUsers(headers: Record<string, string>): Promise<{ dau: number }> {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -178,7 +178,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getMonthlyActiveUsers(headers: any): Promise<{ mau: number }> {
+  private async getMonthlyActiveUsers(headers: Record<string, string>): Promise<{ mau: number }> {
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -199,7 +199,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getWeeklyActiveUsers(headers: any): Promise<{ wau: number }> {
+  private async getWeeklyActiveUsers(headers: Record<string, string>): Promise<{ wau: number }> {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -220,7 +220,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getEventAnalytics(headers: any): Promise<{
+  private async getEventAnalytics(headers: Record<string, string>): Promise<{
     totalEvents: number;
     topEvents: { event: string; count: number }[];
     avgSessionDuration: number;
@@ -261,7 +261,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getRetentionData(headers: any): Promise<{
+  private async getRetentionData(headers: Record<string, string>): Promise<{
     retentionRates: { [period: string]: number };
     cohorts: CohortRetentionData[];
   }> {
@@ -309,7 +309,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getFeatureAdoption(headers: any): Promise<FeatureAdoptionMetrics[]> {
+  private async getFeatureAdoption(headers: Record<string, string>): Promise<FeatureAdoptionMetrics[]> {
     // This would need to be customized based on your specific feature events
     const keyFeatures = [
       'eval_run_created',
@@ -380,7 +380,7 @@ export class PostHogCollector extends BaseCollector {
     return Math.min(score, 10);
   }
 
-  private async getChurnRiskUsers(headers: any): Promise<number> {
+  private async getChurnRiskUsers(headers: Record<string, string>): Promise<number> {
     // Users who haven't been active in 7 days
     try {
       const sevenDaysAgo = new Date();
@@ -401,7 +401,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getHighEngagementUsers(headers: any): Promise<number> {
+  private async getHighEngagementUsers(headers: Record<string, string>): Promise<number> {
     // Users with high activity in last 7 days
     try {
       const response = await axios.post(`${this.baseUrl}/api/projects/${this.projectId}/insights/trend`, {
@@ -419,7 +419,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getNewUserGrowthRate(headers: any): Promise<number> {
+  private async getNewUserGrowthRate(headers: Record<string, string>): Promise<number> {
     try {
       const thisMonth = new Date();
       const lastMonth = new Date(thisMonth);
@@ -438,7 +438,7 @@ export class PostHogCollector extends BaseCollector {
     }
   }
 
-  private async getNewUsersForPeriod(headers: any, date: Date): Promise<number> {
+  private async getNewUsersForPeriod(headers: Record<string, string>, date: Date): Promise<number> {
     const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
     const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 

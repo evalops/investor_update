@@ -37,7 +37,7 @@ export class GCPCollector extends BaseCollector {
     }
   }
 
-  private async queryBillingData(): Promise<any[]> {
+  private async queryBillingData(): Promise<Array<{ month: string; gpu: number; cpu: number; total?: number }>> {
     const { start } = this.getDateRange(6);
 
     // Query to get GPU vs CPU costs from BigQuery billing export
@@ -70,8 +70,9 @@ export class GCPCollector extends BaseCollector {
       location: 'US'
     };
 
-    const [rows] = await this.bigquery!.query(options);
-    return rows;
+    if (!this.bigquery) {throw new Error('BigQuery client not initialized');}
+    const [rows] = await this.bigquery.query(options);
+    return rows as Array<{ month: string; gpu: number; cpu: number; total?: number }>;
   }
 
   async collect(): Promise<CollectorResult> {

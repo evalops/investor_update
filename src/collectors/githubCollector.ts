@@ -100,7 +100,7 @@ export class GitHubCollector extends BaseCollector {
     }
   }
 
-  private async collectRepoMetrics(org: string, repo: string, headers: any) {
+  private async collectRepoMetrics(org: string, repo: string, headers: Record<string, string>) {
     const baseUrl = `https://api.github.com/repos/${org}/${repo}`;
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

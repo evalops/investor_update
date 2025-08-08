@@ -69,41 +69,59 @@ export class MetricsAggregator {
     };
 
     // Merge all metrics into EvalOpsMetrics
+    const snow = snowflakeData.data as {
+      evalRuns?: number;
+      evalRunsGrowth?: number;
+      activeWorkspaces?: number;
+      activeWorkspacesGrowth?: number;
+      averageEvalDuration?: number;
+      monthlyEvalRuns?: { month: string; evalRuns: number }[];
+    };
+    const gcp = gcpData.data as {
+      gpuComputeSpend?: number;
+      cpuComputeSpend?: number;
+      totalComputeSpend?: number;
+      computeSpendGrowth?: number;
+      costPerEvalRun?: number;
+      monthlyComputeSpend?: { month: string; gpu: number; cpu: number }[];
+    };
+    const stripe = stripeData.data as { mrr?: number; arr?: number; pipelineArr?: number; bookedArr?: number };
+
     const evalOpsMetrics: EvalOpsMetrics = {
       ...baseMetrics,
 
       // Core EvalOps KPIs from Snowflake
-      evalRuns: snowflakeData.data.evalRuns || 0,
-      evalRunsGrowth: snowflakeData.data.evalRunsGrowth || 0,
-      activeWorkspaces: snowflakeData.data.activeWorkspaces || 0,
-      activeWorkspacesGrowth: snowflakeData.data.activeWorkspacesGrowth || 0,
-      averageEvalDuration: snowflakeData.data.averageEvalDuration || 0,
-      monthlyEvalRuns: snowflakeData.data.monthlyEvalRuns || [],
+      evalRuns: snow.evalRuns || 0,
+      evalRunsGrowth: snow.evalRunsGrowth || 0,
+      activeWorkspaces: snow.activeWorkspaces || 0,
+      activeWorkspacesGrowth: snow.activeWorkspacesGrowth || 0,
+      averageEvalDuration: snow.averageEvalDuration || 0,
+      monthlyEvalRuns: snow.monthlyEvalRuns || [],
 
       // Compute metrics from GCP
-      gpuComputeSpend: gcpData.data.gpuComputeSpend || 0,
-      cpuComputeSpend: gcpData.data.cpuComputeSpend || 0,
-      totalComputeSpend: gcpData.data.totalComputeSpend || 0,
-      computeSpendGrowth: gcpData.data.computeSpendGrowth || 0,
-      costPerEvalRun: gcpData.data.costPerEvalRun || 0,
-      monthlyComputeSpend: gcpData.data.monthlyComputeSpend || [],
+      gpuComputeSpend: gcp.gpuComputeSpend || 0,
+      cpuComputeSpend: gcp.cpuComputeSpend || 0,
+      totalComputeSpend: gcp.totalComputeSpend || 0,
+      computeSpendGrowth: gcp.computeSpendGrowth || 0,
+      costPerEvalRun: gcp.costPerEvalRun || 0,
+      monthlyComputeSpend: gcp.monthlyComputeSpend || [],
 
       // Business metrics from Stripe
-      pipelineArr: stripeData.data.pipelineArr || 0,
-      bookedArr: stripeData.data.bookedArr || 0,
+      pipelineArr: stripe.pipelineArr || 0,
+      bookedArr: stripe.bookedArr || 0,
 
       // Calculated metrics
       grossMargin: this.calculateGrossMargin(
-        stripeData.data.mrr || baseMetrics.mrr,
-        gcpData.data.totalComputeSpend || 0
+        (stripe.mrr || baseMetrics.mrr),
+        (gcp.totalComputeSpend || 0)
       )
     };
 
     // Override base metrics with more accurate Stripe data if available
-    if (stripeData.data.mrr) {
-      evalOpsMetrics.mrr = stripeData.data.mrr;
-      evalOpsMetrics.arr = stripeData.data.arr;
-      evalOpsMetrics.averageMonthlyRevenue = stripeData.data.mrr;
+    if (stripe.mrr) {
+      evalOpsMetrics.mrr = stripe.mrr;
+      evalOpsMetrics.arr = stripe.arr || evalOpsMetrics.arr;
+      evalOpsMetrics.averageMonthlyRevenue = stripe.mrr;
     }
 
     return { metrics: evalOpsMetrics, dataSourceStatus };

@@ -2,7 +2,7 @@ import { logger } from '../utils/logger';
 
 export interface CollectorResult {
   source: string;
-  data: Record<string, any>;
+  data: unknown;
   timestamp: Date;
   error?: string;
 }
@@ -66,11 +66,12 @@ export abstract class BaseCollector {
     throw lastError!;
   }
 
-  protected isTransientError(error: any): boolean {
-    if (!error) {return false;}
+  protected isTransientError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') {return false;}
+    const err = error as { message?: string; code?: string; status?: number };
 
-    const message = error.message?.toLowerCase() || '';
-    const code = error.code;
+    const message = err.message?.toLowerCase() || '';
+    const code = err.code;
 
     // Network/timeout errors
     if (message.includes('timeout') ||
@@ -83,7 +84,7 @@ export abstract class BaseCollector {
     }
 
     // HTTP status codes that might be retryable
-    if (error.status >= 500 || error.status === 429) {
+    if (typeof err.status === 'number' && (err.status >= 500 || err.status === 429)) {
       return true;
     }
 
