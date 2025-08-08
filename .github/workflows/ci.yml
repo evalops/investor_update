@@ -36,6 +36,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       
+      - name: Install system libraries (canvas)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev \
+            pkg-config
+
       - name: Install dependencies
         run: npm ci
       
@@ -61,6 +73,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       
+      - name: Install system libraries (canvas)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev \
+            pkg-config
+
       - name: Install dependencies
         run: npm ci
       
@@ -131,6 +155,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       
+      - name: Install system libraries (canvas)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev \
+            pkg-config
+
       - name: Install dependencies
         run: npm ci
       
@@ -173,6 +209,18 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       
+      - name: Install system libraries (canvas)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev \
+            pkg-config
+
       - name: Install dependencies
         run: npm ci
       
